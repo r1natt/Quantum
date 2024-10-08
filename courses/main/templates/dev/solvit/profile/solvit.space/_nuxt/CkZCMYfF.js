@@ -1,0 +1,2 @@
+import{B as s,ap as c}from"./BSpKbMoe.js";const g=(e,t)=>`/interviews/${e}/questions/${t}`,i=e=>`/questions/${e}`,u=async e=>{const t=i(e);await s(t)},p=e=>{try{let t="";e.forEach((r,o)=>{const a=o!=e.length-1?" ":"";t+=r.content?r.content+a:""});let n=/(<([^>]+)>)/gi;return t.replace(n,"").replace(/\r?\n/g,"#").replace("	"," ").replace(`
+`," ").replace("    "," ").replace("    "," ").replace("    "," ")}catch(t){return console.log("getQuestionText ERROR",t),c}};export{i as a,u as b,p as c,g};
