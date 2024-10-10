@@ -3,12 +3,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Spotless Hungry Crocodile</title>
+    <title>Quantum</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
   </head>
 
   <body id="iau9">
-    <div id="i6po" class="gjs-grid-row">
+    <!-- <div id="i6po" class="gjs-grid-row">
       <div id="itjq" class="gjs-grid-column">
         <div id="iyd2" class="gjs-grid-row">
           <div id="iqjl" class="gjs-grid-column"><a id="iucmr" href="/"
@@ -25,12 +25,25 @@
               </div>
             </div>
           </div>
+          {% if not is_login %}
           <div id="id7x" class="gjs-grid-column">
               <a href="/login" id="i1mew" class="gjs-button">Войти</a>
           </div>
+          {% endif %}
+          {% if is_login %}
+          <div class="gjs-grid-column" id="il3ujk">
+            <a href="/profile" class="gjs-link-box" id="im8k4f"
+              ><img
+                alt="reshot-icon-user-7ZXA3QERGV.svg"
+                src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAzMiAzMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMzIgMzI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNMTYsMTRjLTMuODU5ODYzMywwLTctMy4xNDAxMzY3LTctN3MzLjE0MDEzNjctNyw3LTdzNywzLjE0MDEzNjcsNyw3UzE5Ljg1OTg2MzMsMTQsMTYsMTR6IE0xNiwyDQoJCQljLTIuNzU2ODM1OSwwLTUsMi4yNDMxNjQxLTUsNXMyLjI0MzE2NDEsNSw1LDVzNS0yLjI0MzE2NDEsNS01UzE4Ljc1NjgzNTksMiwxNiwyeiIvPg0KCTwvZz4NCgk8Zz4NCgkJPHBhdGggZD0iTTIzLjk0MjM4MjgsMzJIOC4wNTc2MTcyQzUuODIwMzEyNSwzMiw0LDMwLjE3OTY4NzUsNCwyNy45NDIzODI4YzAtNi42MTY2OTkyLDUuMzgzMzAwOC0xMiwxMi0xMnMxMiw1LjM4MzMwMDgsMTIsMTINCgkJCUMyOCwzMC4xNzk2ODc1LDI2LjE3OTY4NzUsMzIsMjMuOTQyMzgyOCwzMnogTTE2LDE3Ljk0MjM4MjhjLTUuNTE0MTYwMiwwLTEwLDQuNDg1ODM5OC0xMCwxMA0KCQkJQzYsMjkuMDc3MTQ4NCw2LjkyMjg1MTYsMzAsOC4wNTc2MTcyLDMwaDE1Ljg4NDc2NTZDMjUuMDc3MTQ4NCwzMCwyNiwyOS4wNzcxNDg0LDI2LDI3Ljk0MjM4MjgNCgkJCUMyNiwyMi40MjgyMjI3LDIxLjUxNDE2MDIsMTcuOTQyMzgyOCwxNiwxNy45NDIzODI4eiIvPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K"
+                id="if8jyq"
+            /></a>
+          </div>
+          {% endif %}
         </div>
       </div>
-    </div>
+    </div> -->
+    {% include "header.html" %}
     <div id="irz7b" class="gjs-grid-row">
       <div id="iycz3" class="gjs-grid-column">
         <h1 id="irjua" class="gjs-heading">Insert Hero <br/><span id="i4jn1p" class="gjs-text-blue">text here</span></h1>
