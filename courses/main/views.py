@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
-from .db import Users
-
+from django.contrib.auth.decorators import login_required
+from .models import Users
+import hashlib
 
 
 def is_login(request):
@@ -17,6 +18,8 @@ def index(request):
     hash_id = request.session.get('hash_id')
     is_login = False
     
+    print(request.user.is_authenticated)
+
     if not(hash_id is None):
         is_login = True
 
@@ -26,17 +29,27 @@ def index(request):
 
 def login(request):
     if request.POST:
-        users = Users()
 
         email = request.POST.get("email")
         password = request.POST.get("password")
-        if users.is_user_in_db(email, password):
+        
+        if Users.objects.filter(
+                email=email, 
+                password=password
+            ).exists():
             hash_id = users.get_user_hash(email, password)
         else:
-            users.insert_new_user(email, password)
-            hash_id = users.get_user_hash(email, password)
-        
+            username = "asd"
+            user = Users.objects.create_user(
+                email,
+                password,
+                hashlib.md5((email + password).encode()).hexdigest()
+            )
+            user.save()
+            hash_id = hashlib.md5((email + password).encode()).hexdigest()
+
         request.session["hash_id"] = hash_id
+        request.is_authenticated = True
         response = redirect("../")
         # response.set_cookie("hash_id", hash_id, path="/")
 
@@ -48,6 +61,7 @@ def log_out(request):
     del request.session['hash_id']
     return redirect("../")
 
+@login_required
 def profile(request):
     is_login = is_login(request)
     
@@ -64,7 +78,18 @@ def profile(request):
     else:
         return redirect("/login")
         
-def courses(request):
+def courses_overview(request):
+    template = loader.get_template("courses.html")
+
+    is_login = is_login(request)
+    
+    return HttpResponse(
+        template.render(
+            {"is_login": is_login
+        }, request)
+    )
+
+def course_page(request):
     template = loader.get_template("courses.html")
 
     is_login = is_login(request)
