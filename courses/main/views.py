@@ -3,7 +3,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from .models import User
+from .models import (
+    User, 
+    Course,
+    Lesson, 
+    LessonModule,
+    QuestionModule,
+    Question,
+    UserAnswer
+)
 from .forms import RegisterForm
 
 from .course_structure import course_data
@@ -58,7 +66,12 @@ def course_page(request, course_id):
         }
     )
 
-def lesson_page(request):
+def lesson_page(request, course_id, lesson_id):
+    # lesson_data = Lesson.objects.filter(LessonModule.objects.filter(course_id=course_id).values('id')=lesson_id)
+    # lesson_data = Lesson.objects.filter().values('id')
+    # lesson_data = Lesson.objects.select_related('lessons_module')
+    lesson_data = list(Lesson.objects.values("id"))
+    print(lesson_data)
     return render(request, 'lesson_page.html', {"user": request.user})
 
 def get_question(course_id, question_id):
@@ -79,10 +92,15 @@ def test_page(request, course_id, question_id):
         answer = request.POST.get("answer")
         print(answer)
 
-    return render(request, 'test_page.html', {
-        "user": request.user, 
-        "course_name": course_data.name,
-        "question": get_question(course_id, question_id)})
+    return render(
+        request, 
+        'test_page.html', 
+        {
+            "user": request.user, 
+            "course_name": course_data.name,
+            "question": get_question(course_id, question_id)
+        }
+    )
 
 
     

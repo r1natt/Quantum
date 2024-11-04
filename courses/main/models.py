@@ -29,15 +29,19 @@ class Course(models.Model):
 
 class LessonModule(models.Model):
     name = models.CharField(max_length=50)
+    course = models.ForeignKey(Course, related_name='lessons_module', on_delete=models.CASCADE)
 
 class Lesson(models.Model):
+    name = models.CharField(max_length=50)
     lesson_text = models.CharField(max_length=1000)
     lesson_module = models.ForeignKey(LessonModule, related_name='lesson', on_delete=models.CASCADE)
 
 class QuestionModule(models.Model):
     name = models.CharField(max_length=50)
+    course = models.ForeignKey(Course, related_name='questions_module', on_delete=models.CASCADE)
 
 class Question(models.Model):
+    name = models.CharField(max_length=50)
     question_text = models.CharField(max_length=1000)
     question_module = models.ForeignKey(QuestionModule, related_name='question', on_delete=models.CASCADE)
 
@@ -45,7 +49,6 @@ class UserAnswer(models.Model):
     user = models.ForeignKey(User, related_name='user_choices', on_delete=models.DO_NOTHING)
     is_correct = models.BooleanField()
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-
 
 # class Questions(models.Model):
 #     question_text = models.CharField(max_length=200)
