@@ -1,60 +1,58 @@
 from django.db import models
 from datetime import datetime
-from django.contrib.auth.models import AbstractBaseUser, UserManager
+from django.contrib.auth.models import User
 from django.utils import timezone
 
+"""
+От бд нужно:
+хранить пользователей
+хранить курсы, теорию, тесты
 
-# class Users(AbstractBaseUser):
-#     objects = UserManager()
-
-#     email = models.EmailField(
-#         verbose_name='email address',
-#         max_length=255,
-#         unique=True,
-#     )
-#     password = models.CharField(max_length=30)
-#     hash_id = models.CharField(max_length=32)
-
-#     username = models.CharField(max_length=30)
-#     date_joined = models.DateTimeField(default=timezone.now)
-#     is_staff = models.BooleanField(default=False)
-#     is_active = models.BooleanField(default=True)
-#     is_superuser = models.BooleanField(default=False)
-
-#     USERNAME_FIELD = "email"
-#     REQUIRED_FIELDS = []
+Каждый пользователь может проходить несколько курсов
+Каждый курс имеет несколько записей о теории и тестах
 
 
-# from django_sorcery.db import databases
+Таблицы:
+users
+courses
+lessons
+    lesson
+questions
+    question у каждого вопроса есть id курса, id вопроса 
+"""
 
-# db = databases.get("default")
 
-# from sqlalchemy import String, create_engine
-# from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+class Course(models.Model):
+    name = models.CharField(max_length=50)
+    desc = models.CharField(max_length=250)
+    author = models.CharField(max_length=50)
 
-# engine = create_engine(
-#     f"postgresql+psycopg2://quantum:admin@localhost:5432/quantum", 
-#     pool_size=10, 
-#     max_overflow=20, 
-#     pool_pre_ping=True
-# )
+class LessonModule(models.Model):
+    name = models.CharField(max_length=50)
 
-# class Base(DeclarativeBase):
-#     pass
+class Lesson(models.Model):
+    lesson_text = models.CharField(max_length=1000)
+    lesson_module = models.ForeignKey(LessonModule, related_name='lesson', on_delete=models.CASCADE)
 
-# class UsersTable(Base):
-#     __tablename__ = "users"
+class QuestionModule(models.Model):
+    name = models.CharField(max_length=50)
 
-#     id: Mapped[int] = mapped_column(primary_key=True)
+class Question(models.Model):
+    question_text = models.CharField(max_length=1000)
+    question_module = models.ForeignKey(QuestionModule, related_name='question', on_delete=models.CASCADE)
 
-#     email: Mapped[str] = mapped_column(String(30))
-#     password: Mapped[str] = mapped_column(String(30))
-#     hash_id: Mapped[str] = mapped_column(String(32))
+class UserAnswer(models.Model):
+    user = models.ForeignKey(User, related_name='user_choices', on_delete=models.DO_NOTHING)
+    is_correct = models.BooleanField()
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-# Base.metadata.create_all(engine)
 
-# class Users(db.Model):
-#     id = db.Column(db.Integer(), primary_key=True)
-#     email = db.Column(db.String(length=30))
-#     password = db.Column(db.String(length=30))
-#     hash_id = db.Column(db.String(length=30))
+# class Questions(models.Model):
+#     question_text = models.CharField(max_length=200)
+#     pub_date = models.DateTimeField("date published")
+
+
+# class Choice(models.Model):
+#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+#     choice_text = models.CharField(max_length=200)
+#     votes = models.IntegerField(default=0)
