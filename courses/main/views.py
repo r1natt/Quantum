@@ -1,101 +1,88 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template import loader
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Users
-import hashlib
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from .models import User
+from .forms import RegisterForm
 
+from .course_structure import course_data
 
-def is_login(request):
-    hash_id = request.session.get('hash_id')
-    is_login = False
-    
-    if not(hash_id is None):
-        is_login = True
-    return is_login
 
 def index(request):
-    hash_id = request.session.get('hash_id')
-    is_login = False
-    
-    print(request.user.is_authenticated)
+    return render(request, "index.html", {"user": request.user})
 
-    if not(hash_id is None):
-        is_login = True
+def register_view(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = User.objects.create_user(username=username, password=password)
+            login(request, user)
+            return redirect('index')
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form':form})
 
-    print(hash_id, is_login)
-
-    return render(request, "index.html", {"is_login": is_login})
-
-def login(request):
-    if request.POST:
-
-        email = request.POST.get("email")
+def login_view(request):
+    error_message = None
+    if request.method == "POST":  
+        username = request.POST.get("username")
         password = request.POST.get("password")
-        
-        if Users.objects.filter(
-                email=email, 
-                password=password
-            ).exists():
-            hash_id = users.get_user_hash(email, password)
+        user = authenticate(request, username=username, password=password)  
+        if user is not None:  
+            login(request, user)  
+            next_url = request.POST.get('next') or request.GET.get('next') or 'index'  
+            return redirect(next_url) 
         else:
-            username = "asd"
-            user = Users.objects.create_user(
-                email,
-                password,
-                hashlib.md5((email + password).encode()).hexdigest()
-            )
-            user.save()
-            hash_id = hashlib.md5((email + password).encode()).hexdigest()
+            error_message = "Invalid credentials"  
+    return render(request, 'login.html', {'error': error_message})
 
-        request.session["hash_id"] = hash_id
-        request.is_authenticated = True
-        response = redirect("../")
-        # response.set_cookie("hash_id", hash_id, path="/")
-
-        return response
-    
-    return render(request, "login.html")
-
-def log_out(request):
-    del request.session['hash_id']
-    return redirect("../")
+def logout_view(request):
+    logout(request)
+    return redirect('index')
 
 @login_required
 def profile(request):
-    is_login = is_login(request)
-    
-    if is_login:
-        template = loader.get_template("profile.html")
-        context = {
-            "is_login": is_login,
-        }
-        return HttpResponse(
-            template.render(
-                {"is_login": is_login
-            }, request)
-        )
-    else:
-        return redirect("/login")
-        
+    return render(request, 'profile.html', {"user": request.user})
+
 def courses_overview(request):
-    template = loader.get_template("courses.html")
+    return render(request, 'courses.html', {"user": request.user})
 
-    is_login = is_login(request)
-    
-    return HttpResponse(
-        template.render(
-            {"is_login": is_login
-        }, request)
+def course_page(request, course_id):
+    return render(request, 'course_page.html', {
+            "user": request.user, 
+            "course_data": course_data, 
+            "name": course_data.name
+        }
     )
 
-def course_page(request):
-    template = loader.get_template("courses.html")
+def lesson_page(request):
+    return render(request, 'lesson_page.html', {"user": request.user})
 
-    is_login = is_login(request)
+def get_question(course_id, question_id):
+    chapters = course_data.chapters
+
+    for chapter in chapters:
+        if chapter.type == 2:
+            questions = chapter.questions
+            break
+
+    for question in questions:
+        if question.order == question_id:
+            return question
+    return -1
+
+def test_page(request, course_id, question_id):
+    if request.method == "POST":
+        answer = request.POST.get("answer")
+        print(answer)
+
+    return render(request, 'test_page.html', {
+        "user": request.user, 
+        "course_name": course_data.name,
+        "question": get_question(course_id, question_id)})
+
+
     
-    return HttpResponse(
-        template.render(
-            {"is_login": is_login
-        }, request)
-    )
