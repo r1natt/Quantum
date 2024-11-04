@@ -1,0 +1,470 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>course page</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="index,follow" />
+    <meta name="generator" content="GrapesJS Studio" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      .gjs-link-box {
+        color: inherit;
+        display: inline-block;
+        vertical-align: top;
+        padding: 10px;
+        max-width: 100%;
+        text-decoration: none;
+      }
+      .gjs-grid-column {
+        flex: 1 1 0%;
+        padding: 5px 0;
+      }
+      .gjs-link {
+        vertical-align: top;
+        max-width: 100%;
+        display: inline-block;
+        text-decoration: none;
+        color: inherit;
+      }
+      .gjs-grid-row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: stretch;
+        flex-direction: row;
+        min-height: auto;
+        padding: 10px 0;
+      }
+      .gjs-grid-column {
+        flex: 1 1 0%;
+        padding: 5px 0;
+      }
+      .gjs-grid-row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: stretch;
+        flex-direction: row;
+        min-height: auto;
+        padding: 10px 0;
+      }
+      .gjs-link-box {
+        color: inherit;
+        display: inline-block;
+        vertical-align: top;
+        padding: 10px;
+        max-width: 100%;
+        text-decoration: none;
+      }
+      .gjs-link {
+        vertical-align: top;
+        max-width: 100%;
+        display: inline-block;
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.3s ease 0s;
+      }
+      .text-main-content {
+        line-height: 30px;
+        font-size: 1.2rem;
+      }
+      .gjs-grid-column.feature-item {
+        padding-top: 15px;
+        padding-right: 15px;
+        padding-bottom: 15px;
+        padding-left: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 30%;
+      }
+      .gjs-grid-column.testimonial-item {
+        padding-top: 15px;
+        padding-right: 15px;
+        padding-bottom: 15px;
+        padding-left: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 45%;
+        background-color: rgba(247, 247, 247, 0.23);
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: 5px;
+        align-items: flex-start;
+        border-top-width: 1px;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+        border-left-width: 1px;
+        border-top-style: solid;
+        border-right-style: solid;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-top-color: rgba(0, 0, 0, 0.06);
+        border-right-color: rgba(0, 0, 0, 0.06);
+        border-bottom-color: rgba(0, 0, 0, 0.06);
+        border-left-color: rgba(0, 0, 0, 0.06);
+      }
+      .gjs-button {
+        vertical-align: top;
+        max-width: 100%;
+        display: inline-block;
+        text-decoration: none;
+        color: white;
+        padding-right: 15px;
+        padding-bottom: 10px;
+        padding-left: 15px;
+        background-color: rgb(36, 99, 235);
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: 5px;
+        padding-top: 10px;
+        font-size: 1.1rem;
+        text-align: center;
+      }
+      .gjs-link:hover {
+        color: rgb(36, 99, 235);
+        text-decoration: underline;
+      }
+      #iermg3 {
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        width: 49px;
+        height: 49px;
+      }
+      #i3s86y {
+        display: block;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        opacity: 100%;
+      }
+      #i4cdqu {
+        flex: 0 1 auto;
+      }
+      #ireyr3 {
+        padding: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      #i1452j {
+        padding: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      #i8d75d {
+        flex: 0 1 auto;
+      }
+      #io3ja6 {
+        padding: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      #iiwr3i {
+        flex: 0 1 auto;
+      }
+      #i4vmvu {
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+      #isr64g {
+        flex: 0 1 auto;
+      }
+      #iw6a8s {
+        flex: 0 1 auto;
+        display: block;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      #irxncf {
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        backdrop-filter: blur(13px);
+        box-shadow: 0px 2px 7px 0px rgba(0, 0, 0, 0.14);
+      }
+      #izez2k {
+        width: 100%;
+        max-width: 1200px;
+      }
+      #ihk3lh {
+        justify-content: center;
+        position: sticky;
+        top: 15px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      #ii75qf {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background-image: linear-gradient(#03346e 1%, #03346e 100%);
+        background-position: 0px 0px;
+        background-size: 100% 100%;
+        background-repeat: round;
+        background-attachment: scroll;
+        background-origin: padding-box;
+        justify-content: flex-start;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+        border-bottom-right-radius: 30px;
+        border-bottom-left-radius: 30px;
+        max-width: 800px;
+        padding-bottom: 0px;
+      }
+      #ifj2fi {
+        justify-content: center;
+        padding-top: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 80px;
+      }
+      #in98j3 {
+        font-family: Arial, Helvetica, sans-serif;
+        background-image: unset;
+        background-position: unset;
+        background-size: unset;
+        background-repeat: unset;
+        background-attachment: unset;
+        background-origin: unset;
+        color: #475569;
+      }
+      #course_name {
+        text-align: left;
+        max-width: 750px;
+        color: white;
+        font-size: 3rem;
+        font-weight: 600;
+        flex: 1 1 0%;
+        align-self: center;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: flex-end;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        margin-top: 5px;
+        word-break: break-word;
+      }
+      #iblg1l {
+        padding: 10px;
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-top: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+        color: #afafaf;
+      }
+      #iq0vva {
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        border-bottom-left-radius: 20px;
+        color: rgba(0, 0, 0, 1);
+        background-color: #ffffff;
+        max-width: 780px;
+        width: 780px;
+        padding-bottom: 0px;
+        padding-top: 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #ier01r {
+        padding-top: 0px;
+        padding-bottom: 10px;
+      }
+      #ijektj {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #iaeuiu {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #i8jnn2 {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #icfh94 {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #ihmt3b {
+        padding: 10px;
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-top: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+      }
+      #iz1dqj {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #ijakrh {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #ivs0li {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      #i1mcmh {
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        flex: 0 1 auto;
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      @keyframes fadeEffect {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @media (max-width: 992px) {
+        .gjs-grid-row {
+          flex-direction: column;
+        }
+        .gjs-grid-row {
+          flex-direction: column;
+        }
+        #i4vmvu {
+          flex-direction: row;
+        }
+        #irxncf {
+          flex-direction: row;
+        }
+        #iq0vva {
+          max-width: 710px;
+        }
+      }
+      @media (max-width: 768px) {
+        #isr64g {
+          display: none;
+        }
+        #ier01r {
+          width: 480px;
+          justify-content: center;
+          align-items: center;
+          display: flex;
+          flex-wrap: nowrap;
+          align-content: center;
+        }
+        #iq0vva {
+          align-self: center;
+          display: flex;
+          max-width: 510px;
+        }
+        #ihmt3b {
+          padding-bottom: 5px;
+          align-items: stretch;
+          justify-content: flex-start;
+          flex-direction: row;
+          align-self: auto;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body id="in98j3">
+    {% include "header.html" %}
+    <div id="ifj2fi" class="gjs-grid-row">
+      <div id="ii75qf" class="gjs-grid-column">
+        <div id="course_name" class="text-main-content">{{ course_data.name }}</div>
+        <div id="ier01r" class="gjs-grid-row">
+          <div id="iq0vva" class="gjs-grid-column">
+
+            {% for chapter in course_data.chapters %}
+              <div id="ihmt3b" class="text-main-content">{{ chapter.name }}</div>
+              {% for lesson in chapter.lessons %}
+                <div id="ijektj" class="text-main-content"><a href="/asd">{{ lesson.name }}</a><br /></div>
+              {% endfor %}
+              {% for question in chapter.questions %}
+                <div id="ijektj" class="text-main-content"><a href="/tests/{{ course_data.id }}/{{ question.order }}">{{ question.name }}</a><br /></div>
+              {% endfor %}
+            {% endfor %}
+            <!-- <div id="iblg1l" class="text-main-content">Глава 1</div>
+              <div id="ijektj" class="text-main-content">Урок 1.1<br /></div>
+              <div id="ijakrh" class="text-main-content">Урок 1.2<br /></div>
+              <div id="icfh94" class="text-main-content">Урок 1.3<br /></div>
+              <div id="i8jnn2" class="text-main-content">Урок 1.4<br /></div>
+            <div id="ihmt3b" class="text-main-content">Глава 2<br /></div>
+              <div id="iz1dqj" class="text-main-content">Урок 2.1<br /></div>
+              <div id="iaeuiu" class="text-main-content">Урок 2.2<br /></div>
+              <div id="ivs0li" class="text-main-content">Урок 2.3<br /></div>
+              <div id="i1mcmh" class="text-main-content">Урок 2.4<br /></div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>test page (Copy)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'test.css' %}">
+</head>
+
+<body id="i53qac">
+  {% include "header.html" %}
+  <div class="gjs-grid-row" id="iqswes">
+    <div class="gjs-grid-column" id="ifksyk">
+      <div class="gjs-grid-row" id="i8a9yd">
+        <div class="gjs-grid-column" id="irum59">
+          <div class="text-main-content" id="i6tw2x">{{ course_name }}</div>
+          <div class="text-main-content" id="ihstf4">Вопрос {{ question.order }}</div>
+          <!-- <img src="{% static 'images/dalle.webp' %}" id="iyeznn"/> -->
+          <div class="text-main-content" id="iu6srs">{{ question.question }}<br/></div>
+          
+          <form method="post" id="igqle7">
+            {% csrf_token %}
+            <div id="iuu0el"><input type="radio" id="i49wug" name="answer"/><label id="imw2mn">{{ question.answers.0 }}</label></div>
+            <div id="iuu0el"><input type="radio" id="i3eqyp" name="answer"/><label id="imw2mn">{{ question.answers.1 }}</label></div>
+            <div id="iuu0el"><input type="radio" id="iod5qf" name="answer"/><label id="imw2mn">{{ question.answers.2 }}</label></div>
+            <div id="iuu0el"><input type="radio" id="i4yk56" name="answer"/><label id="imw2mn">{{ question.answers.3 }}</label></div>
+            <button type="submit" id="i9eraa">Отправить</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- {% include "footer.html" %} -->
+</body>
