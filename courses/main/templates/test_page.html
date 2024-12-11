@@ -22,7 +22,6 @@
           <div class="text-main-content" id="ihstf4">Вопрос {{ question.order }}</div>
           <!-- <img src="{% static 'images/dalle.webp' %}" id="iyeznn"/> -->
           <div class="text-main-content" id="iu6srs">{{ question.question }}<br/></div>
-          
           <form method="post" id="igqle7">
             {% csrf_token %}
             <div id="iuu0el"><input type="radio" id="i49wug" name="answer"/><label id="imw2mn">{{ question.answers.0 }}</label></div>
