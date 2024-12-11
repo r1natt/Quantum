@@ -135,13 +135,8 @@ def get_question(course_id, question_id):
             return question
     return -1
 
-def get_user_answer(request_obj):
-    answers = [
-        request_obj.POST.get("answer1"),
-        request_obj.POST.get("answer2"),
-        request_obj.POST.get("answer3"),
-        request_obj.POST.get("answer4")
-    ]
+def get_user_answer(request_obj, answers):
+    answer = request_obj.POST.get("answer")
 
     for n, answer in enumerate(answers):
         if answer:
@@ -160,10 +155,17 @@ def save_user_answer(user_id, course_id, question_id, is_correct, user_answer):
 @login_required
 def question_page(request, course_id, question_id):
 
+    questions_list = get_questions_list(course_id)
+    question_index = questions_list.index(question_id)
+
+    questions_obj = Question.objects.filter(id=question_id).first()
+    answers = questions_obj.answers
+
     question = get_question(course_id, question_id)
 
     if request.method == "POST":
-        user_answer = get_user_answer(request)
+        user_answer = get_user_answer(request, answers)
+        print(user_answer)
         is_correct = False
 
         if user_answer == question.correct_answer:
@@ -172,19 +174,23 @@ def question_page(request, course_id, question_id):
         else:
             print(f'{question_id} incorrect_answer :( ({user_answer})')
         
-        save_user_answer(
-            request.user.id,
-            course_id,
-            question_id,
-            is_correct,
-            user_answer
-        )
+        # save_user_answer(
+        #     request.user.id,
+        #     course_id,
+        #     question_id,
+        #     is_correct,
+        #     user_answer
+        # )
         
-        if get_question(course_id, question_id + 1) == -1:
+        ic(question_index)
+        ic(len(questions_list) - 1)
+        ic(question_index == len(questions_list) - 1)
+
+        if question_index == len(questions_list) - 1:
             # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
-            return redirect('/tests/results')
+            return redirect(f'/courses/{course_id}/test/results')
         else:
-            return redirect(f'/tests/{course_id}/{question_id + 1}')
+            return redirect(f'/courses/{course_id}/test/{questions_list[question_index + 1]}')
 
     return render(
         request, 
@@ -192,7 +198,7 @@ def question_page(request, course_id, question_id):
         {
             "user": request.user, 
             "course_name": course_data.name,
-            "question": question
+            "question": questions_obj
         }
     )
 
