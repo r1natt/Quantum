@@ -67,16 +67,59 @@ def courses_overview(request):
 def course_page(request, course_id):
     return render(request, 'course_page.html', {
             "user": request.user, 
-            "course_data": course_data, 
-            "name": course_data.name
+            "course_data": Course.objects.filter(id=course_id).first()
         }
     )
 
+def get_lessons_list(course_id):
+    lessons_group = Course.objects.filter(id=course_id).first().lessons_group.all()
+    lessons_list = []
+    for lesson_group in lessons_group:
+        for lesson in lesson_group.lesson.all():
+            lessons_list.append(lesson.id)
+    return lessons_list
+
+def get_questions_list(course_id):
+    questions_group = Course.objects.filter(id=course_id).first().questions_group.all()
+    questions_list = []
+    for question_group in questions_group:
+        for question in question_group.question.all():
+            questions_list.append(question.id)
+    return questions_list
+
 @login_required
 def lesson_page(request, course_id, lesson_id):
-    lesson_data = Lesson.objects.filter(course_id=course_id, id=lesson_id).values()
-    print(lesson_data)
-    return render(request, 'lesson_page.html', {"user": request.user})
+    lesson_data = Lesson.objects.filter(id=lesson_id).first()
+
+    lessons_list = get_lessons_list(course_id)
+    questions_group = get_questions_list(course_id)
+    
+    lesson_index = lessons_list.index(lesson_id)
+    ic(lesson_index)
+    ic(lessons_list)
+    ic(lesson_index == len(lessons_list) - 1)
+
+    if lesson_index == 0:
+        prev = f'/courses/{course_id}'
+    else:
+        prev = f'/courses/{course_id}/lesson/{lessons_list[lesson_index - 1]}'
+
+    
+    if lesson_index == len(lessons_list) - 1:
+        next = f'/courses/{course_id}/test/{questions_group[0]}'
+    else:
+        next = f'/courses/{course_id}/lesson/{lessons_list[lesson_index + 1]}'
+
+    return render(
+        request, 
+        'lesson_page.html', 
+        {
+            "user": request.user,
+            "lesson_data": lesson_data,
+            "prev": prev,
+            "next": next
+        }
+    )
 
 
 def get_question(course_id, question_id):
@@ -156,6 +199,8 @@ def question_page(request, course_id, question_id):
 def test_page(request):
     course_query = Course.objects.filter(id=1)[0]
     ic(course_query.id)
+    ic(dir(course_query))
+    ic(course_query.lessons_group.all())
     course_id = course_query.id
     
     lessons_groups = Lessons_Group.objects.filter(course=course_id)
