@@ -1,3 +1,5 @@
+from icecream import ic
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,15 +8,17 @@ from django.views import View
 from .models import (
     User, 
     Course,
-    Lesson, 
-    LessonModule,
-    QuestionModule,
+    Lessons_Group,
+    Lesson,
+    Questions_Group,
     Question,
     UserAnswer
 )
 from .forms import RegisterForm
 
 from .course_structure import course_data
+
+from django.http import HttpResponse
 
 
 def index(request):
@@ -35,16 +39,16 @@ def register_view(request):
 
 def login_view(request):
     error_message = None
-    if request.method == "POST":  
+    if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)  
-        if user is not None:  
-            login(request, user)  
-            next_url = request.POST.get('next') or request.GET.get('next') or 'index'  
-            return redirect(next_url) 
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            next_url = request.POST.get('next') or request.GET.get('next') or 'index'
+            return redirect(next_url)
         else:
-            error_message = "Invalid credentials"  
+            error_message = "Invalid credentials"
     return render(request, 'login.html', {'error': error_message})
 
 def logout_view(request):
@@ -55,9 +59,11 @@ def logout_view(request):
 def profile(request):
     return render(request, 'profile.html', {"user": request.user})
 
+@login_required
 def courses_overview(request):
     return render(request, 'courses.html', {"user": request.user})
 
+@login_required
 def course_page(request, course_id):
     return render(request, 'course_page.html', {
             "user": request.user, 
@@ -66,13 +72,12 @@ def course_page(request, course_id):
         }
     )
 
+@login_required
 def lesson_page(request, course_id, lesson_id):
-    # lesson_data = Lesson.objects.filter(LessonModule.objects.filter(course_id=course_id).values('id')=lesson_id)
-    # lesson_data = Lesson.objects.filter().values('id')
-    # lesson_data = Lesson.objects.select_related('lessons_module')
-    lesson_data = list(Lesson.objects.values("id"))
+    lesson_data = Lesson.objects.filter(course_id=course_id, id=lesson_id).values()
     print(lesson_data)
     return render(request, 'lesson_page.html', {"user": request.user})
+
 
 def get_question(course_id, question_id):
     chapters = course_data.chapters
@@ -87,10 +92,56 @@ def get_question(course_id, question_id):
             return question
     return -1
 
-def test_page(request, course_id, question_id):
+def get_user_answer(request_obj):
+    answers = [
+        request_obj.POST.get("answer1"),
+        request_obj.POST.get("answer2"),
+        request_obj.POST.get("answer3"),
+        request_obj.POST.get("answer4")
+    ]
+
+    for n, answer in enumerate(answers):
+        if answer:
+            return str(n + 1)
+            # возвращаю строку потому что буду сравнивать это значение дальше со строкой 
+
+def save_user_answer(user_id, course_id, question_id, is_correct, user_answer):
+    UserAnswer.objects.create(
+        user=user_id,
+        course=course_id,
+        question=question_id,
+        is_correct=is_correct,
+        user_answer=user_answer
+    )
+
+@login_required
+def question_page(request, course_id, question_id):
+
+    question = get_question(course_id, question_id)
+
     if request.method == "POST":
-        answer = request.POST.get("answer")
-        print(answer)
+        user_answer = get_user_answer(request)
+        is_correct = False
+
+        if user_answer == question.correct_answer:
+            is_correct = True
+            print(f'{question_id} correct answer! ({user_answer})')
+        else:
+            print(f'{question_id} incorrect_answer :( ({user_answer})')
+        
+        save_user_answer(
+            request.user.id,
+            course_id,
+            question_id,
+            is_correct,
+            user_answer
+        )
+        
+        if get_question(course_id, question_id + 1) == -1:
+            # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
+            return redirect('/tests/results')
+        else:
+            return redirect(f'/tests/{course_id}/{question_id + 1}')
 
     return render(
         request, 
@@ -98,9 +149,20 @@ def test_page(request, course_id, question_id):
         {
             "user": request.user, 
             "course_name": course_data.name,
-            "question": get_question(course_id, question_id)
+            "question": question
         }
     )
 
-
+def test_page(request):
+    course_query = Course.objects.filter(id=1)[0]
+    ic(course_query.id)
+    course_id = course_query.id
     
+    lessons_groups = Lessons_Group.objects.filter(course=course_id)
+    ic(lessons_groups)
+
+    for lesson_group in lessons_groups:
+        lessons = Lesson.objects.filter(lesson_group=lesson_group.id)
+        for lesson in lessons:
+            ic(lesson.content)
+    return HttpResponse("Hello!")

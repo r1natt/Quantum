@@ -12,5 +12,6 @@ urlpatterns = [
     path("courses/<int:course_id>", views.course_page, name="course_page"),
     path("courses/<int:course_id>/<int:lesson_id>", views.lesson_page, name="lesson_page"),
     # path("lesson", views.lesson_page, name="lesson page"),
-    path("tests/<int:course_id>/<int:question_id>", views.test_page, name="test page"),
+    path("tests/<int:course_id>/<int:question_id>", views.question_page, name="question page"),
+    path("test", views.test_page, name="test page")
 ]
