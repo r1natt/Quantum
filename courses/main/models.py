@@ -24,30 +24,30 @@ questions
 
 
 class Course(models.Model):
-    name = models.CharField(max_length=50)
-    desc = models.CharField(max_length=250, default="")
-    author = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+    desc = models.CharField(max_length=1000, default="")
+    author = models.CharField(max_length=100)
     create_datetime = models.DateTimeField(default=timezone.now)
 
 class Lessons_Group(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     course = models.ForeignKey(Course, related_name='lessons_group', on_delete=models.CASCADE)
 
 class Lesson(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     content = models.CharField(max_length=10000)
     lesson_group = models.ForeignKey(Lessons_Group, related_name='lesson', on_delete=models.CASCADE)
 
 class Questions_Group(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     course = models.ForeignKey(Course, related_name='questions_group', on_delete=models.CASCADE)
 
 class Question(models.Model):
-    name = models.CharField(max_length=50)
-    question_condition = models.CharField(max_length=1000)
+    name = models.CharField(max_length=100)
+    question_condition = models.CharField(max_length=10000)
     answers = models.JSONField()
     correct_answer = models.IntegerField(default=0)
-    question_group = models.ForeignKey(Course, related_name='question', on_delete=models.CASCADE)
+    question_group = models.ForeignKey(Questions_Group, related_name='question', on_delete=models.CASCADE)
 
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, related_name='user_choices', on_delete=models.DO_NOTHING)
