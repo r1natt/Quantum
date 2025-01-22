@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
+from enum import Enum
 from .models import (
     User, 
     Course,
@@ -12,13 +13,17 @@ from .models import (
     Lesson,
     Questions_Group,
     Question,
-    UserAnswer
+    UserAnswer,
+    # ActionType,
+    # Action
 )
 from .forms import RegisterForm
-
 from .course_structure import course_data
-
 from django.http import HttpResponse
+# from .action_types import (
+#     ActionTypeEnum,
+#     get_action_type_obj
+# )
 
 
 def index(request):
@@ -65,6 +70,7 @@ def courses_overview(request):
 
 @login_required
 def course_page(request, course_id):
+
     return render(request, 'course_page.html', {
             "user": request.user, 
             "course_data": Course.objects.filter(id=course_id).first()
@@ -121,7 +127,6 @@ def lesson_page(request, course_id, lesson_id):
         }
     )
 
-
 def get_question(course_id, question_id):
     chapters = course_data.chapters
 
@@ -135,21 +140,16 @@ def get_question(course_id, question_id):
             return question
     return -1
 
-def get_user_answer(request_obj, answers):
-    answer = request_obj.POST.get("answer")
+def get_user_answer(request_obj, answers) -> int:
+    return int(request_obj.POST['answer'])
 
-    for n, answer in enumerate(answers):
-        if answer:
-            return str(n + 1)
-            # возвращаю строку потому что буду сравнивать это значение дальше со строкой 
-
-def save_user_answer(user_id, course_id, question_id, is_correct, user_answer):
+def save_user_answer(user_obj, course_id, question, is_correct, user_answer):
     UserAnswer.objects.create(
-        user=user_id,
-        course=course_id,
-        question=question_id,
+        user=user_obj,
+        course=Course.objects.get(id=course_id),
+        question=question,
         is_correct=is_correct,
-        user_answer=user_answer
+        answer=user_answer
     )
 
 @login_required
@@ -158,39 +158,44 @@ def question_page(request, course_id, question_id):
     questions_list = get_questions_list(course_id)
     question_index = questions_list.index(question_id)
 
-    questions_obj = Question.objects.filter(id=question_id).first()
-    answers = questions_obj.answers
+    question_obj = Question.objects.filter(id=question_id).first()
+    answers = question_obj.answers 
 
     question = get_question(course_id, question_id)
 
     if request.method == "POST":
         user_answer = get_user_answer(request, answers)
-        print(user_answer)
         is_correct = False
 
-        if user_answer == question.correct_answer:
+        ic(type(user_answer))
+        ic(user_answer)
+        ic(question.correct_answer)
+
+        if user_answer == int(question.correct_answer):
+            """
+            int(question.correct_answer) - я дополнительно делаю ответ числом, 
+            потому что question.correct_answer выдается строкой, хотя в модельке
+            прописано что поле correct_answer число, хз где все идет не так
+            """
             is_correct = True
-            print(f'{question_id} correct answer! ({user_answer})')
+            print(f'question_id: {question_id} - correct answer! ({user_answer})')
         else:
             print(f'{question_id} incorrect_answer :( ({user_answer})')
         
-        # save_user_answer(
-        #     request.user.id,
-        #     course_id,
-        #     question_id,
-        #     is_correct,
-        #     user_answer
-        # )
-        
-        ic(question_index)
-        ic(len(questions_list) - 1)
-        ic(question_index == len(questions_list) - 1)
+        save_user_answer(
+            request.user,
+            course_id,
+            question_obj,
+            is_correct,
+            user_answer
+        )
 
         if question_index == len(questions_list) - 1:
             # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
-            return redirect(f'/courses/{course_id}/test/results')
+            redirect_page = f'/courses/{course_id}/test/results'
         else:
-            return redirect(f'/courses/{course_id}/test/{questions_list[question_index + 1]}')
+            redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
+        return redirect(redirect_page)
 
     return render(
         request, 
@@ -198,7 +203,7 @@ def question_page(request, course_id, question_id):
         {
             "user": request.user, 
             "course_name": course_data.name,
-            "question": questions_obj
+            "question": question_obj
         }
     )
 
