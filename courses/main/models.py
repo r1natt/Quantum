@@ -3,6 +3,9 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models.functions import Now
+from django.core.management.base import BaseCommand
+from icecream import ic
+from enum import Enum
 
 """
 От бд нужно:
@@ -22,10 +25,13 @@ questions
     question у каждого вопроса есть id курса, id вопроса 
 """
 
+# class UserProfile(User):
+#     image = models.ImageField(upload_to="profile_image", blank=True)
 
 class Course(models.Model):
     name = models.CharField(max_length=100)
-    desc = models.CharField(max_length=1000, default="")
+    short_desc = models.CharField(max_length=200, default="")
+    desc = models.CharField(max_length=2000, default="")
     author = models.CharField(max_length=100)
     create_datetime = models.DateTimeField(default=timezone.now)
 
@@ -50,8 +56,26 @@ class Question(models.Model):
     question_group = models.ForeignKey(Questions_Group, related_name='question', on_delete=models.CASCADE)
 
 class UserAnswer(models.Model):
-    user = models.ForeignKey(User, related_name='user_choices', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     is_correct = models.BooleanField()
-    user_answer = models.IntegerField(default=-1)
-    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, default=-1)
+    answer = models.IntegerField(default=-1)
+    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+class ActionsCodes(Enum):
+    OPEN_COURSE = 1
+    OPEN_LESSON = 2
+    OPEN_TEST = 3
+    QUESTION_ANSWER = 4
+    END_TEST = 5
+
+"""
+Таблица UserActions нужна, чтобы фиксировать незаконченные курсы, а также 
+"""
+class UserActions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    action_code = models.IntegerField()
+    user_answer = models.ForeignKey(UserAnswer, on_delete=models.CASCADE, null=True)
+    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.DO_NOTHING, null=True)
+    question_group = models.ForeignKey(Questions_Group, on_delete=models.DO_NOTHING, null=True)
