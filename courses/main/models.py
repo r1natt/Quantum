@@ -65,7 +65,8 @@ class UserAnswer(models.Model):
 class ActionsCodes(Enum):
     OPEN_COURSE = 1
     OPEN_LESSON = 2
-    OPEN_TEST = 3
+    START_TEST = 6
+    OPEN_QUESTION = 3
     QUESTION_ANSWER = 4
     END_TEST = 5
 
@@ -78,4 +79,4 @@ class UserActions(models.Model):
     user_answer = models.ForeignKey(UserAnswer, on_delete=models.CASCADE, null=True)
     course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True)
     lesson = models.ForeignKey(Lesson, on_delete=models.DO_NOTHING, null=True)
-    question_group = models.ForeignKey(Questions_Group, on_delete=models.DO_NOTHING, null=True)
+    question = models.ForeignKey(Questions_Group, on_delete=models.DO_NOTHING, null=True)
