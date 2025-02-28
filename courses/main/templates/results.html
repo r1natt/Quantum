@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Course results</title>
+  <link rel="stylesheet" href="{% static 'results.css' %}">
+</head>
+
+<body id="ifxy75">
+  
+  {% include "header.html" %}
+
+  <div id="is8dxj" class="gjs-grid-row">
+    <div id="ikmkp6" class="gjs-grid-column">
+      <div id="in47fm" class="gjs-grid-row">
+        <div id="if9iqy" class="gjs-grid-column">
+          <div id="irc8yx" class="text-main-content">{{ course_obj.name }}</div>
+          <div id="i8lkai" class="text-main-content">{{ question_group.name }}</div>
+          <div id="i765fh" class="text-main-content">{{ correct_answers }}/{{ questions_count }}<br/></div>
+          <div id="ih89uj" class="text-main-content">{{ text }}<br/></div>
+          <!-- <a href="/courses"><div id="issfw8" class="text-main-content">Перейти на страницу с курсами</div></a> -->
+          <a id="idu5dj" href="/courses">Перейти на страницу с курсами</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
