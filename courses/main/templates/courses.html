@@ -1,47 +1,48 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html>
 
 <head>
-	<title>courses</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<meta name="robots" content="index,follow">
-	<meta name="generator" content="GrapesJS Studio">
-	<link rel="stylesheet" href="{% static 'courses.css' %}">
+  <title>Курсы</title>
+  <link rel="stylesheet" href="{% static 'courses.css' %}">
 </head>
 
 <body id="isq60w">
-	
-	{% include "header.html" %}
-	
-	<div id="i0a14h" class="gjs-grid-row">
+
+  {% include "header.html" %}
+
+  <div id="i0a14h" class="gjs-grid-row">
     <div id="iawajf" class="gjs-grid-column">
       <div id="ip82cb">Наши Курсы</div>
+      
+      {% for threes in courses_nested_list %}
+
       <div id="i12m0a" class="gjs-grid-row">
+
+        {% for course in threes %}
+
+        {% if course != None %}
         <div id="irkfhs" class="gjs-grid-column">
-          <h1 id="iy0tlu" class="gjs-heading">Коаксиальный кабель<br/></h1>
-          <div id="id9pyk" class="text-main-content"><span id="ij3edk">С нашим курсом вы познакомитесь с характеристиками и свойствами коаксиальных кабелей<br/></span></div>
-          <div id="i68fio" class="text-main-content"><span id="i93sad">Катя Скоморохина<br/></span></div>
-          <a id="iunmmi" class="gjs-button" href="/courses/1">Перейти к Курсу!</a>
+          <h1 id="iy0tlu" class="gjs-heading">{{ course.name }}<br/></h1>
+          <div id="id9pyk" class="text-main-content">
+            <span id="ij3edk">{{ course.short_desc }}<br/></span>
+          </div>
+          <div id="i68fio" class="text-main-content">
+            <span id="i93sad">{{ course.author }}<br/></span>
+          </div>
+          <a id="iunmmi" class="gjs-button" href="{{ course.id }}">Перейти к Курсу!</a>
         </div>
-        <div id="irkfhs" class="gjs-grid-column">
-          <h1 id="iy0tlu" class="gjs-heading">Квантовая механика<br/></h1>
-          <div id="id9pyk" class="text-main-content"><span id="ij3edk">Находиться в Разработке<br/></span></div>
-          <div id="i68fio" class="text-main-content"><span id="i93sad">Стас Чикенев<br/></span></div><a id="iunmmi"
-            class="gjs-button">Перейти к Курсу!</a>
-        </div>
-        <div id="irkfhs" class="gjs-grid-column">
-          <h1 id="iy0tlu" class="gjs-heading">Квантовая механика<br/></h1>
-          <div id="id9pyk" class="text-main-content"><span id="ij3edk">Находиться в Разработке<br/></span></div>
-          <div id="i68fio" class="text-main-content"><span id="i93sad">Катя Скоморохина<br/></span></div>
-          <a id="iunmmi" class="gjs-button">Перейти к Курсу!</a>
-        </div>
+        {% endif %}
+				{% if course == None %}
+        <div id="irkfhs_empty" class="gjs-grid-column"></div>
+        {% endif %}
+
+        {% endfor %}
       </div>
+      {% endfor %}
+
     </div>
   </div>
-
 </body>
 
 </html>
