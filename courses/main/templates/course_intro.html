@@ -1,0 +1,31 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>{{ lesson_data.name }}</title>
+  <link rel="stylesheet" href="{% static 'course_intro.css' %}">
+</head>
+
+<body id="i618fg">
+
+  {% include "header.html" %}
+
+  <div id="iyhsul" class="gjs-grid-row">
+    <div id="i4w35u" class="gjs-grid-column">
+      <div id="i50bmf" class="gjs-grid-row">
+        <div id="ig3c3o" class="gjs-grid-column">
+          <div id="it0uxf" class="text-main-content">{{ course_data.name }}</div>
+          <div id="ileeuv" class="text-main-content">{{ course_data.desc }}</div>
+          <div id="ig9gzf" class="gjs-grid-row">
+            <div id="ifvdcd" class="gjs-grid-column"><a id="i4873p" href="{{ next }}">Поехали!</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
