@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 
 </html>
 
@@ -23,9 +24,11 @@
       <div id="ieq3s9" class="gjs-grid-row">
         <div id="i2rmok" class="gjs-grid-column">
           <div id="ivpilr" class="text-main-content">{{ lesson_data.name }}</div>
-          <!-- <img src="assets/dall_e_2024_10_05_17.12.40___a_surreal_and_beautiful_scene_of_an_atomic_world._particles_like_protons__neutrons__and_electrons_float_in_the_air__swirling_in_a_mesmerizing_dance._t.webp" id="ikbxfs"/> -->
-			<!-- <div class="text-main-content" id="ikridk">{{ lesson_data.content }}</div> -->
-          <div id="ikridk" class="text-main-content">{{ lesson_data.content }}</div>
+          
+          <div id="ikridk" class="text-main-content">{{ text_with_images | convert_images | safe }}</div>
+          <!-- {% for img in lesson_data.imgs %}
+          <img id="ikbxfs" src="{% static 'images/lessons/' %}{{ img }}" />
+          {% endfor %} -->
           <div id="ibu9ho" class="gjs-grid-row">
             <div id="ipt2b2" class="gjs-grid-column">
               <button type="button" id="iwbngl" onclick="window.location='{{ prev }}';"><span id="iakvki">Предыдущий урок</span></button></div>

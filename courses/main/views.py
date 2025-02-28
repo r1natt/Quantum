@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from enum import Enum
+import re
 from .models import (
     User, 
     Course,
@@ -72,7 +73,7 @@ def actions_registration(
         user_answer=None,
         course_id=None,
         lesson_id=None,
-        question_group_id=None
+        question_id=None
     ):
     # Уверен можно распаковать аргументы более элегантно, но пока оставлю так
     """
@@ -80,13 +81,16 @@ def actions_registration(
     точки кода, не прописывая каждый раз create-запрос, а просто вызвав эту 
     функцию указывая только нужные аргументы под действие 
     """
+    course_obj = Course.objects.filter(id=course_id).first() if course_id != None else None
+    lesson_obj = Lesson.objects.filter(id=lesson_id).first() if lesson_id != None else None
+    question_obj = Question.objects.filter(id=question_id).first() if question_id != None else None
     UserActions.objects.create(
             user=user,
             action_code=action_code.value,
             user_answer=user_answer,
-            course=course_id,
-            lesson=lesson_id,
-            question_group=question_group_id
+            course=course_obj,
+            lesson=lesson_obj,
+            question=question_obj
         )
     
 
@@ -184,6 +188,68 @@ def get_questions_list(course_id):
 def parse_lesson_text(text) -> str:
     pass
 
+def unparse_imgs(text):
+    """
+    Довольно костыльная функция, для которой еще и контекст нужен
+
+    Контекст: лекции состоят не только из текста, но и картинок. 
+    Эти картинки должны быть как-то выведены посередине текста. 
+    Чтобы этого добиться я ввожу тэги <img>img_name.png<\img> непосредственно 
+    в самом тексте (это значит, что эту конструкцию я буду хранить в бдшке и не 
+    смогу проверять ошибки тэгов при создании новой лекции).
+    
+    Это плохо, но вводить парсинг полноценного markdown с проверками 
+    корректности markdown в таком маленьком проекте только ради картинок я 
+    считаю избыточным)
+
+    Еще это плохо потому что я начинаю в бдшке хранить почти уже html, но еще 
+    не html, но он почти уже html
+    """
+    pattern = r'\<\s*img\s*\>(.*?)\<\\s*img\s*\>' # regex паттерн: <img>file_name.png<\img> -> file_name.png
+    text = re.sub(pattern, r'<img id="ikbxfs" src="/main/static/images/lessons/\1" />', text)
+    """
+    В строке выше костыли продолжаются
+
+    Теперь я знаю имена файлов картинок, которые нужно вставить посреди текста, 
+    но у картинок уже есть свои стили, и это проблема, потому что я хардкожу имя 
+    css на уровне бэкенда, и если я изменю id стиля картинки, я даже не пойму, 
+    почему картинка не форматируется как я хочу.
+    
+    Я понимаю это и принимаю этот риск🙏 (я устал и мне смешно)
+
+    Есть другое решение, заместо замены моих тэгов html тэгами (как это происходит сейчас), в таблицу 
+    lesson добавить столбец imgs_list (JSON type) и туда через запятую записать 
+    имена картинок, а в тексте записать индексы этих картинок, где они должны 
+    быть вставлены, вот так:
+    
+    a = '''something text 
+    img_1
+    img_2
+    asdasd'''
+
+    Но это еще хуже, если я ошибусь, и добавлю лишний индекс:
+    a = '''something text 
+    img_1
+    img_2
+    img_3
+    asdasd'''
+    То нет правильного решения в этой проблеме:
+    1) Если я проигнорирую этот индекс, может быть такое, что я в список забыл 
+       внести картинку, и тогда просто потеряю ее на фронте
+    2) Если я выведу это как ошибку, то каждый раз мне придется смотреть решение
+       ошибки в бдшке, что тоже не предел мечтаний
+
+    Как итог получается что я лучше нарушу правило хранение в бдшке только 
+    текста и буду хранить тэги тоже, чем бесконечно копаться в ошибках  
+    """
+    return text
+
+def unparse_lesson_text(text):
+    # TODO выделить text в класс как объект, чтобы применять функции анпарса в внутри класса, который наследуется от text
+    text = text.replace('\n', '<br>')
+    text = unparse_imgs(text)
+    return text
+
 @login_required
 def lesson_page(request, course_id, lesson_id):
     lesson_data = Lesson.objects.filter(id=lesson_id).first()
@@ -193,26 +259,34 @@ def lesson_page(request, course_id, lesson_id):
     
     lesson_index = lessons_list.index(lesson_id)
 
+    actions_registration(
+        request.user,
+        ActionsCodes.OPEN_LESSON,
+        course_id=course_id,
+        lesson_id=lesson_id
+    )
+
     if lesson_index == 0:
         prev = f'/courses/{course_id}'
     else:
         prev = f'/courses/{course_id}/lesson/{lessons_list[lesson_index - 1]}'
 
-    
     if lesson_index == len(lessons_list) - 1:
         next = f'/courses/{course_id}/test/{questions_group[0]}'
     else:
         next = f'/courses/{course_id}/lesson/{lessons_list[lesson_index + 1]}'
 
-    imgs = ["first.gif", "second.gif"]
+    text = unparse_lesson_text(lesson_data.content)
 
     return render(
         request, 
         'lesson_page.html', 
         {
             "user": request.user,
-            "lesson_data": lesson_data,
-            "imgs": imgs,
+            "lesson_data": {
+                "name": lesson_data.name,
+                "text": text
+            },
             "prev": prev,
             "next": next
         }
@@ -246,7 +320,7 @@ def save_user_answer(user_obj, course_id, question, is_correct, user_answer):
     
     is_in_db = check_user_answer_exist(user_obj, course, question)
     if not is_in_db:
-        UserAnswer.objects.create(
+        return UserAnswer.objects.create(
             user=user_obj,
             course=course,
             question=question,
@@ -277,13 +351,15 @@ def question_page(request, course_id, question_id):
         else:
             print(f'{question_id} incorrect_answer :( ({user_answer})')
         
-        save_user_answer(
+        answer_obj = save_user_answer(
             request.user,
             course_id,
             question,
             is_correct,
             user_answer
         )
+
+        print(dir(answer_obj))
         
         questions_list = get_questions_list(course_id)
         question_index = questions_list.index(question_id)
@@ -294,6 +370,13 @@ def question_page(request, course_id, question_id):
         else:
             redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
         return redirect(redirect_page)
+
+    actions_registration(
+        request.user,
+        ActionsCodes.OPEN_QUESTION,
+        course_id=course_id,
+        question_id=question_id
+    )
 
     return render(
         request, 
