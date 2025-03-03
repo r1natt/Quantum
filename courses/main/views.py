@@ -16,17 +16,22 @@ from .models import (
     Question,
     UserAnswer,
     UserActions,
-
     ActionsCodes
 )
+
+# from db_operations import (
+#     ActionsOp,
+#     CoursesOp,
+#     LessonsOp,
+#     QuestionsOp,
+#     AnswersOp,
+
+# )
 
 from .forms import RegisterForm
 from .course_structure import course_data
 from django.http import HttpResponse
-# from .action_types import (
-#     ActionTypeEnum,
-#     get_action_type_obj
-# )
+
 
 
 def index(request):
@@ -67,87 +72,16 @@ def logout_view(request):
 def profile(request):
     return render(request, 'profile.html', {"user": request.user})
 
-def actions_registration(
-        user, 
-        action_code: ActionsCodes, 
-        user_answer=None,
-        course_id=None,
-        lesson_id=None,
-        question_id=None
-    ):
-    # Уверен можно распаковать аргументы более элегантно, но пока оставлю так
-    """
-    Данная функция позволяет зарегестрировать действия пользователя из любой 
-    точки кода, не прописывая каждый раз create-запрос, а просто вызвав эту 
-    функцию указывая только нужные аргументы под действие 
-    """
-    course_obj = Course.objects.filter(id=course_id).first() if course_id != None else None
-    lesson_obj = Lesson.objects.filter(id=lesson_id).first() if lesson_id != None else None
-    question_obj = Question.objects.filter(id=question_id).first() if question_id != None else None
-    UserActions.objects.create(
-            user=user,
-            action_code=action_code.value,
-            user_answer=user_answer,
-            course=course_obj,
-            lesson=lesson_obj,
-            question=question_obj
-        )
-    
-
-def get_nested_lists(input_list, dim):
-    """
-    В процессе верстки страниц курсов и курсов в профиле нам нужно распределить
-    одномерный список курсов по строкам из 3-х, 4-х ячеек с этими курсами,
-    данная функция получает на вход список, который нужно распределить на строки
-    с элементами в количестве dim штук
-    
-    Примеры:
-    Вход: 
-        input_list = [1, 2, 3, 4, 5, 6] 
-        n = 5
-    Выход:
-        [[1, 2, 3, 4, 5], [6, None, None, None, None]]
-
-    Вход: 
-        input_list = [1, 2, 3, 4, 5, 6] 
-        n = 3
-    Выход:
-        [[1, 2, 3], [4, 5, 6]]
-
-    Вход: 
-        input_list = [1, 2, 3] 
-        n = 3
-    Выход:
-        [[1, 2, 3]]
-
-    """
-
-    dims = []
-    
-    list_of_dim = [None for _ in range(dim)]
-    for n, course in enumerate(input_list):
-        del list_of_dim[n % dim]
-        list_of_dim.insert(n % dim, course)
-        if n + 1 == dim:
-            dims.append(list_of_dim)
-            list_of_dim = [None for _ in range(dim)]
-
-    if any(list_of_dim):
-        dims.append(list_of_dim)
-
-    return dims
-
 @login_required
 def courses_overview(request):
-    courses = Course.objects.all()
-    nested_lists = get_nested_lists(courses, 3)
-    print(nested_lists)
+    courses = Course.get_courses_nested_list()
+    print(courses)
     return render(
         request, 
         'courses.html', 
         {
             "user": request.user,
-            "courses_nested_list": nested_lists
+            "courses_nested_list": courses
         }
     )
 
@@ -162,104 +96,23 @@ def course_intro(request, course_id):
 
 @login_required
 def course_page(request, course_id):
-    actions_registration(request.user, ActionsCodes.OPEN_COURSE)
+    UserActions.actions_registration(request.user, ActionsCodes.OPEN_COURSE)
     return render(request, 'course_page.html', {
             "user": request.user, 
             "course_data": Course.objects.filter(id=course_id).first()
         }
     )
 
-def get_lessons_list(course_id):
-    lessons_group = Course.objects.filter(id=course_id).first().lessons_group.all()
-    lessons_list = []
-    for lesson_group in lessons_group:
-        for lesson in lesson_group.lesson.all():
-            lessons_list.append(lesson.id)
-    return lessons_list
-
-def get_questions_list(course_id):
-    questions_group = Course.objects.filter(id=course_id).first().questions_group.all()
-    questions_list = []
-    for question_group in questions_group:
-        for question in question_group.question.all():
-            questions_list.append(question.id)
-    return questions_list
-
-def parse_lesson_text(text) -> str:
-    pass
-
-def unparse_imgs(text):
-    """
-    Довольно костыльная функция, для которой еще и контекст нужен
-
-    Контекст: лекции состоят не только из текста, но и картинок. 
-    Эти картинки должны быть как-то выведены посередине текста. 
-    Чтобы этого добиться я ввожу тэги <img>img_name.png<\img> непосредственно 
-    в самом тексте (это значит, что эту конструкцию я буду хранить в бдшке и не 
-    смогу проверять ошибки тэгов при создании новой лекции).
-    
-    Это плохо, но вводить парсинг полноценного markdown с проверками 
-    корректности markdown в таком маленьком проекте только ради картинок я 
-    считаю избыточным)
-
-    Еще это плохо потому что я начинаю в бдшке хранить почти уже html, но еще 
-    не html, но он почти уже html
-    """
-    pattern = r'\<\s*img\s*\>(.*?)\<\\s*img\s*\>' # regex паттерн: <img>file_name.png<\img> -> file_name.png
-    text = re.sub(pattern, r'<img id="ikbxfs" src="/main/static/images/lessons/\1" />', text)
-    """
-    В строке выше костыли продолжаются
-
-    Теперь я знаю имена файлов картинок, которые нужно вставить посреди текста, 
-    но у картинок уже есть свои стили, и это проблема, потому что я хардкожу имя 
-    css на уровне бэкенда, и если я изменю id стиля картинки, я даже не пойму, 
-    почему картинка не форматируется как я хочу.
-    
-    Я понимаю это и принимаю этот риск🙏 (я устал и мне смешно)
-
-    Есть другое решение, заместо замены моих тэгов html тэгами (как это происходит сейчас), в таблицу 
-    lesson добавить столбец imgs_list (JSON type) и туда через запятую записать 
-    имена картинок, а в тексте записать индексы этих картинок, где они должны 
-    быть вставлены, вот так:
-    
-    a = '''something text 
-    img_1
-    img_2
-    asdasd'''
-
-    Но это еще хуже, если я ошибусь, и добавлю лишний индекс:
-    a = '''something text 
-    img_1
-    img_2
-    img_3
-    asdasd'''
-    То нет правильного решения в этой проблеме:
-    1) Если я проигнорирую этот индекс, может быть такое, что я в список забыл 
-       внести картинку, и тогда просто потеряю ее на фронте
-    2) Если я выведу это как ошибку, то каждый раз мне придется смотреть решение
-       ошибки в бдшке, что тоже не предел мечтаний
-
-    Как итог получается что я лучше нарушу правило хранение в бдшке только 
-    текста и буду хранить тэги тоже, чем бесконечно копаться в ошибках  
-    """
-    return text
-
-def unparse_lesson_text(text):
-    # TODO выделить text в класс как объект, чтобы применять функции анпарса в внутри класса, который наследуется от text
-    text = text.replace('\n', '<br>')
-    text = unparse_imgs(text)
-    return text
-
 @login_required
 def lesson_page(request, course_id, lesson_id):
     lesson_data = Lesson.objects.filter(id=lesson_id).first()
 
-    lessons_list = get_lessons_list(course_id)
-    questions_group = get_questions_list(course_id)
+    lessons_list = Course.get_lessons_list(course_id)
+    questions_group = Course.get_questions_list(course_id)
     
     lesson_index = lessons_list.index(lesson_id)
 
-    actions_registration(
+    UserActions.actions_registration(
         request.user,
         ActionsCodes.OPEN_LESSON,
         course_id=course_id,
@@ -276,10 +129,10 @@ def lesson_page(request, course_id, lesson_id):
     else:
         next = f'/courses/{course_id}/lesson/{lessons_list[lesson_index + 1]}'
 
-    text = unparse_lesson_text(lesson_data.content)
+    text = lesson_data.content
 
     return render(
-        request, 
+        request,    
         'lesson_page.html', 
         {
             "user": request.user,
@@ -292,47 +145,32 @@ def lesson_page(request, course_id, lesson_id):
         }
     )
 
-# def get_question(course_id, question_id):
-#     chapters = course_data.chapters
-
-#     for chapter in chapters:
-#         if chapter.type == 2:
-#             questions = chapter.questions
-#             break
-
-#     for question in questions:
-#         if question.order == question_id:
-#             return question
-#     return -1
+@login_required
+def test_intro(request, course_id):
+    UserActions.actions_registration(
+        request.user,
+        ActionsCodes.START_TEST,
+        course_id=course_id
+    )
+    return render(
+        request, 
+        'test_intro.html', 
+        {
+            "user": request.user,
+            "first_question_id": Course.objects.filter(
+                id=course_id
+                ).first().questions_group.first().id
+        }
+    )
 
 def get_user_answer(request_obj) -> int:
     return int(request_obj.POST['answer'])
-
-def check_user_answer_exist(user, course, question) -> bool:
-    return UserAnswer.objects.filter(
-        user=user,
-        course=course,
-        question=question
-    ).exists()
-
-def save_user_answer(user_obj, course_id, question, is_correct, user_answer):
-    course = Course.objects.get(id=course_id)
-    
-    is_in_db = check_user_answer_exist(user_obj, course, question)
-    if not is_in_db:
-        return UserAnswer.objects.create(
-            user=user_obj,
-            course=course,
-            question=question,
-            is_correct=is_correct,
-            answer=user_answer
-        )
 
 @login_required
 def question_page(request, course_id, question_id):
 
     question = Question.objects.filter(id=question_id).first()
-    answers = question.answers 
+    answers = question.answers
 
     # question = get_question(course_id, question_id)
 
@@ -351,7 +189,7 @@ def question_page(request, course_id, question_id):
         else:
             print(f'{question_id} incorrect_answer :( ({user_answer})')
         
-        answer_obj = save_user_answer(
+        answer_obj = UserAnswer.save_user_answer(
             request.user,
             course_id,
             question,
@@ -359,9 +197,17 @@ def question_page(request, course_id, question_id):
             user_answer
         )
 
+        UserActions.actions_registration(
+            request.user,
+            ActionsCodes.QUESTION_ANSWER,
+            course_id=course_id,
+            question_id=question_id,
+            user_answer=answer_obj
+        )
+
         print(dir(answer_obj))
         
-        questions_list = get_questions_list(course_id)
+        questions_list = Course.get_questions_list(course_id)
         question_index = questions_list.index(question_id)
         
         if question_index == len(questions_list) - 1:
@@ -371,7 +217,7 @@ def question_page(request, course_id, question_id):
             redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
         return redirect(redirect_page)
 
-    actions_registration(
+    UserActions.actions_registration(
         request.user,
         ActionsCodes.OPEN_QUESTION,
         course_id=course_id,
@@ -388,31 +234,10 @@ def question_page(request, course_id, question_id):
         }
     )
 
-def get_user_answers(user, course_id) -> list[bool]:
-    user_answers = UserAnswer.objects.filter(
-        user=user, 
-        course_id=Course.objects.get(
-            id=course_id
-        )
-    ).values_list("is_correct")
-    # user_answers: [(True), (False)]
-
-    return_list = [answer_tuple[0] for answer_tuple in user_answers]
-    # return_list: [True, False]
-
-    return return_list
-
-def questions_count(course_id) -> int:
-    questions_group_obj = Questions_Group.objects.filter(
-            course=Course.objects.get(id=course_id)
-        ).first()
-    questions_count = questions_group_obj.question.count()
-    return questions_count
-
 @login_required
 def test_results_page(request, course_id):
-    user_answers = get_user_answers(request.user, course_id=course_id)
-    questions_c = questions_count(course_id)
+    user_answers = UserAnswer.get_user_answers(request.user, course_id=course_id)
+    questions_c = Questions_Group.questions_count(course_id)
 
     answer_percent = sum(user_answers) / questions_c
 
@@ -422,6 +247,13 @@ def test_results_page(request, course_id):
         text = "Есть куда расти"
     else:
         text = "Чудесный результат!"
+
+    UserActions.actions_registration(
+        request.user,
+        ActionsCodes.OPEN_QUESTION,
+        course_id=course_id,
+        question_id=question_id
+    )
 
     if len(user_answers) == questions_c:
         return render(
@@ -440,8 +272,6 @@ def test_results_page(request, course_id):
         )
     else:
         HttpResponse("Сделать обработку ошибки, если количество ответов не равно количеству вопросов в тесте")
-    
-
 
 def test_page(request):
     course_operations = DBOperations(Course)
