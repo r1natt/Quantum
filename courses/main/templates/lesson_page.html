@@ -1,5 +1,5 @@
 {% load static %}
-{% load custom_filters %}
+{% load markd %}
 
 </html>
 
@@ -25,7 +25,7 @@
         <div id="i2rmok" class="gjs-grid-column">
           <div id="ivpilr" class="text-main-content">{{ lesson_data.name }}</div>
           
-          <div id="ikridk" class="text-main-content">{{ text_with_images | convert_images | safe }}</div>
+          <div id="ikridk" class="text-main-content">{{ lesson_data.text | markdown }}</div>
           <!-- {% for img in lesson_data.imgs %}
           <img id="ikbxfs" src="{% static 'images/lessons/' %}{{ img }}" />
           {% endfor %} -->
