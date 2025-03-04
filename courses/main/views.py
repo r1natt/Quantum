@@ -96,7 +96,11 @@ def course_intro(request, course_id):
 
 @login_required
 def course_page(request, course_id):
-    UserActions.actions_registration(request.user, ActionsCodes.OPEN_COURSE)
+    UserActions.actions_registration(
+        request.user, 
+        ActionsCodes.OPEN_COURSE,
+        course_id=course_id
+    )
     return render(request, 'course_page.html', {
             "user": request.user, 
             "course_data": Course.objects.filter(id=course_id).first()
@@ -196,6 +200,7 @@ def question_page(request, course_id, question_id):
             is_correct,
             user_answer
         )
+        print(answer_obj)
 
         UserActions.actions_registration(
             request.user,
@@ -212,6 +217,11 @@ def question_page(request, course_id, question_id):
         
         if question_index == len(questions_list) - 1:
             # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
+            UserActions.actions_registration(
+                request.user,
+                ActionsCodes.END_TEST,
+                course_id=course_id
+            )
             redirect_page = f'/courses/{course_id}/test/results'
         else:
             redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
@@ -242,18 +252,11 @@ def test_results_page(request, course_id):
     answer_percent = sum(user_answers) / questions_c
 
     if answer_percent <= 0.4:
-        text = "Вам бы лучше пересдать тестик завтра..."
+        text = "Вам бы лучше пересдать тестик..."
     elif answer_percent <= 0.7:
         text = "Есть куда расти"
     else:
         text = "Чудесный результат!"
-
-    UserActions.actions_registration(
-        request.user,
-        ActionsCodes.OPEN_QUESTION,
-        course_id=course_id,
-        question_id=question_id
-    )
 
     if len(user_answers) == questions_c:
         return render(
