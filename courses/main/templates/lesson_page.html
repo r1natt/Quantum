@@ -13,6 +13,7 @@
   <meta name="robots" content="index,follow">
   <meta name="generator" content="GrapesJS Studio">
   <link rel="stylesheet" href="{% static 'lesson_page.css' %}">
+  <link rel="stylesheet" href="{% static 'markdown.css' %}">
 </head>
 
 <body id="iw3mdg">
@@ -25,7 +26,7 @@
         <div id="i2rmok" class="gjs-grid-column">
           <div id="ivpilr" class="text-main-content">{{ lesson_data.name }}</div>
           
-          <div id="ikridk" class="text-main-content">{{ lesson_data.text | markdown }}</div>
+          <div class="markdown_div">{{ lesson_data.text | markdown }}</div>
           <!-- {% for img in lesson_data.imgs %}
           <img id="ikbxfs" src="{% static 'images/lessons/' %}{{ img }}" />
           {% endfor %} -->

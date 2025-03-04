@@ -1,0 +1,29 @@
+#markdown_div {
+	line-height: 30px;
+	font-size: 1.2rem;
+}
+
+.markdown_div p {
+    line-height: 30px;
+	font-size: 1.2rem;
+
+    text-align: left;
+	margin-left: 10px;
+	margin-right: 10px;
+	flex: 0 1 auto;
+	display: flex;
+	justify-content: flex-start;
+	padding-left: 10px;
+
+}
+
+.markdown_div img {
+    color: black;
+    width: 80%;
+    height: 100%;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    align-self:center;
+}
