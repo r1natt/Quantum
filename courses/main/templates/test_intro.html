@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Напутствие перед тестом</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'test_intro.css' %}">
+</head>
+
+<body id="i618fg-2">
+
+  {% include "header.html" %}
+
+  <div id="iyhsul-2" class="gjs-grid-row">
+    <div id="i4w35u-2" class="gjs-grid-column">
+      <div id="i50bmf-2" class="gjs-grid-row">
+        <div id="ig3c3o-2" class="gjs-grid-column">
+          <div id="it0uxf-2" class="text-main-content">Прежде чем начать тест, хорошо подумай!</div>
+          <div id="ileeuv-2" class="text-main-content">
+            <p data-start="57" data-end="175" id="if7gah">У тебя есть 3 попытки, но каждая из них ценна. Если начнешь тест, одна попытка будет засчитана, даже если не завершишь его.</p>
+            <p data-start="177" data-end="379" id="ifxyd6">📌
+              <strong data-start="180" data-end="214"> Перед началом убедись, что:</strong><br data-start="214" data-end="217"/>✔️ Ты готов к вопросам.<br data-start="259" data-end="262"/>✔️ У тебя есть время на прохождение.<br data-start="316" data-end="319"/>✔️ Твои ответы будут зафиксированы сразу после начала.
+            </p>
+            <p data-start="381" data-end="479" data-is-last-node="" data-is-only-node="">Готов ли ты к испытанию? Если
+              да – жми <strong data-start="420" data-end="437">"Начать тест"</strong>. Если нет – лучше еще раз
+              подготовься! 🚀</p>
+          </div>
+          <div id="ig9gzf-2" class="gjs-grid-row">
+            <div id="ifvdcd-2" class="gjs-grid-column"><a id="i4873p-2" href="{{ first_question_id }}">Начать тест</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
