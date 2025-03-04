@@ -6,6 +6,7 @@ from django.db.models.functions import Now
 from django.core.management.base import BaseCommand
 from icecream import ic
 from enum import Enum
+import datetime
 
 """
 От бд нужно:
@@ -30,10 +31,11 @@ questions
 
 class Course(models.Model):
     name = models.CharField(max_length=100)
-    short_desc = models.CharField(max_length=200, default="")
-    desc = models.CharField(max_length=2000, default="")
+    short_desc = models.TextField(max_length=200, default="")
+    desc = models.TextField(max_length=2000, default="")
     author = models.CharField(max_length=100)
     create_datetime = models.DateTimeField(default=timezone.now)
+    is_visible = models.BooleanField(default=True)
 
     @staticmethod
     def get_nested_lists(input_list, dimension):
@@ -61,7 +63,7 @@ class Course(models.Model):
 
     @staticmethod
     def get_courses_nested_list(dimension=3):
-        courses = Course.objects.all()
+        courses = Course.objects.filter(is_visible=True)
         return Course.get_nested_lists(courses, dimension)
 
     @staticmethod
@@ -90,70 +92,6 @@ class Lesson(models.Model):
     name = models.CharField(max_length=100)
     content = models.TextField()
     lesson_group = models.ForeignKey(Lessons_Group, related_name='lesson', on_delete=models.CASCADE)
-    
-    @staticmethod
-    def unparse_imgs(text):
-        """
-        Довольно костыльная функция, для которой еще и контекст нужен
-
-        Контекст: лекции состоят не только из текста, но и картинок. 
-        Эти картинки должны быть как-то выведены посередине текста. 
-        Чтобы этого добиться я ввожу тэги <img>img_name.png<\img> непосредственно 
-        в самом тексте (это значит, что эту конструкцию я буду хранить в бдшке и не 
-        смогу проверять ошибки тэгов при создании новой лекции).
-        
-        Это плохо, но вводить парсинг полноценного markdown с проверками 
-        корректности markdown в таком маленьком проекте только ради картинок я 
-        считаю избыточным)
-
-        Еще это плохо потому что я начинаю в бдшке хранить почти уже html, но еще 
-        не html, но он почти уже html
-        """
-        pattern = r'\<\s*img\s*\>(.*?)\<\\s*img\s*\>' # regex паттерн: <img>file_name.png<\img> -> file_name.png
-        text = re.sub(pattern, r'<img id="ikbxfs" src="/main/static/images/lessons/\1" />', text)
-        """
-        В строке выше костыли продолжаются
-
-        Теперь я знаю имена файлов картинок, которые нужно вставить посреди текста, 
-        но у картинок уже есть свои стили, и это проблема, потому что я хардкожу имя 
-        css на уровне бэкенда, и если я изменю id стиля картинки, я даже не пойму, 
-        почему картинка не форматируется как я хочу.
-        
-        Я понимаю это и принимаю этот риск🙏 (я устал и мне смешно)
-
-        Есть другое решение, заместо замены моих тэгов html тэгами (как это происходит сейчас), в таблицу 
-        lesson добавить столбец imgs_list (JSON type) и туда через запятую записать 
-        имена картинок, а в тексте записать индексы этих картинок, где они должны 
-        быть вставлены, вот так:
-        
-        a = '''something text 
-        img_1
-        img_2
-        asdasd'''
-
-        Но это еще хуже, если я ошибусь, и добавлю лишний индекс:
-        a = '''something text 
-        img_1
-        img_2
-        img_3
-        asdasd'''
-        То нет правильного решения в этой проблеме:
-        1) Если я проигнорирую этот индекс, может быть такое, что я в список забыл 
-        внести картинку, и тогда просто потеряю ее на фронте
-        2) Если я выведу это как ошибку, то каждый раз мне придется смотреть решение
-        ошибки в бдшке, что тоже не предел мечтаний
-
-        Как итог получается что я лучше нарушу правило хранение в бдшке только 
-        текста и буду хранить тэги тоже, чем бесконечно копаться в ошибках  
-        """
-        return text
-
-    @staticmethod
-    def unparse_lesson_text(text):
-        # TODO выделить text в класс как объект, чтобы применять функции анпарса в внутри класса, который наследуется от text
-        text = text.replace('\n', '<br>')
-        text = Lesson.unparse_imgs(text)
-        return text
 
 class Questions_Group(models.Model):
     name = models.CharField(max_length=100)
@@ -169,7 +107,7 @@ class Questions_Group(models.Model):
 
 class Question(models.Model):
     name = models.CharField(max_length=100)
-    question_condition = models.CharField(max_length=10000)
+    question_condition = models.TextField()
     answers = models.JSONField()
     correct_answer = models.IntegerField(default=0)
     question_group = models.ForeignKey(Questions_Group, related_name='question', on_delete=models.CASCADE)
@@ -180,6 +118,7 @@ class UserAnswer(models.Model):
     answer = models.IntegerField(default=-1)
     course = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
 
     @staticmethod
     def check_user_answer_exist(user, course, question) -> bool:
@@ -219,11 +158,11 @@ class UserAnswer(models.Model):
         return return_list
 
 class ActionsCodes(Enum):
-    OPEN_COURSE = 1#
-    OPEN_LESSON = 2 # 
-    START_TEST = 6 # 
-    OPEN_QUESTION = 3 # 
-    QUESTION_ANSWER = 4 # 
+    OPEN_COURSE = 1
+    OPEN_LESSON = 2
+    START_TEST = 6
+    OPEN_QUESTION = 3
+    QUESTION_ANSWER = 4
     END_TEST = 5
 
 """
@@ -233,9 +172,11 @@ class UserActions(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     action_code = models.IntegerField()
     user_answer = models.ForeignKey(UserAnswer, on_delete=models.CASCADE, null=True)
-    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True)
-    lesson = models.ForeignKey(Lesson, on_delete=models.DO_NOTHING, null=True)
-    question = models.ForeignKey(Question, on_delete=models.DO_NOTHING, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
+    is_highest_score = models.BooleanField(null=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     @classmethod
     def actions_registration(
@@ -245,7 +186,8 @@ class UserActions(models.Model):
             user_answer=None,
             course_id=None,
             lesson_id=None,
-            question_id=None
+            question_id=None,
+            is_highest_score=None
         ):
         # Уверен можно распаковать аргументы более элегантно, но пока оставлю так
         """
@@ -262,5 +204,47 @@ class UserActions(models.Model):
                 user_answer=user_answer,
                 course=course_obj,
                 lesson=lesson_obj,
-                question=question_obj
+                question=question_obj,
+                is_highest_score=is_highest_score
             )
+
+    @classmethod
+    def is_user_end_test(self, user_actions_list):
+        is_test_started = False
+        is_test_ended = False
+
+        for action in user_actions_list:
+            match action.action_code:
+                case ActionsCodes.START_TEST.value:
+                    is_test_started = True
+                case ActionsCodes.END_TEST.value:
+                    is_test_ended = True
+        return (is_test_started, is_test_ended)
+
+    @classmethod
+    def interpretate_user_actions(self, user_obj, course_id):
+        is_test_started = False
+        is_test_ended = False
+        is_try_fired = False
+        can_continue_test = False
+
+        course_obj = Course.objects.filter(id=course_id).first()
+        todays_user_actions = UserActions.objects.filter(
+            created_at__date=timezone.now().date(), 
+            user=user_obj,
+            course=course_obj
+        ) # Получает записи, которые были сделаны сегодня
+
+        is_test_started, is_test_ended = UserActions.is_user_end_test(todays_user_actions)
+
+        if is_test_started and is_test_ended:
+            is_try_fired = True
+        elif is_test_started and not(is_test_ended):
+            can_continue_test = True
+        
+        return {
+            'is_test_started': is_test_started,
+            'is_test_ended': is_test_ended,
+            'is_try_fired': is_try_fired,
+            'can_continue_test': can_continue_test
+        }

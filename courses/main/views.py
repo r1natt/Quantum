@@ -129,7 +129,7 @@ def lesson_page(request, course_id, lesson_id):
         prev = f'/courses/{course_id}/lesson/{lessons_list[lesson_index - 1]}'
 
     if lesson_index == len(lessons_list) - 1:
-        next = f'/courses/{course_id}/test/{questions_group[0]}'
+        next = f'/courses/{course_id}/test/intro'
     else:
         next = f'/courses/{course_id}/lesson/{lessons_list[lesson_index + 1]}'
 
@@ -151,21 +151,27 @@ def lesson_page(request, course_id, lesson_id):
 
 @login_required
 def test_intro(request, course_id):
-    UserActions.actions_registration(
-        request.user,
-        ActionsCodes.START_TEST,
-        course_id=course_id
-    )
-    return render(
-        request, 
-        'test_intro.html', 
-        {
-            "user": request.user,
-            "first_question_id": Course.objects.filter(
-                id=course_id
-                ).first().questions_group.first().id
-        }
-    )
+    user_acts = UserActions.interpretate_user_actions(request.user, course_id)
+    print(user_acts)
+    if user_acts["is_try_fired"]:
+        return render(
+            request, 
+            'tries_is_over.html', 
+            {
+                "user": request.user
+            }
+        )
+    else:
+        return render(
+            request, 
+            'test_intro.html', 
+            {
+                "user": request.user,
+                "first_question_id": Course.objects.filter(
+                    id=course_id
+                    ).first().questions_group.first().id
+            }
+        )
 
 def get_user_answer(request_obj) -> int:
     return int(request_obj.POST['answer'])
@@ -175,6 +181,16 @@ def question_page(request, course_id, question_id):
 
     question = Question.objects.filter(id=question_id).first()
     answers = question.answers
+
+    questions_list = Course.get_questions_list(course_id)
+    question_index = questions_list.index(question_id)
+
+    if question_index == 0:
+        UserActions.actions_registration(
+            request.user,
+            ActionsCodes.START_TEST,
+            course_id=course_id
+        )
 
     # question = get_question(course_id, question_id)
 
@@ -217,11 +233,6 @@ def question_page(request, course_id, question_id):
         
         if question_index == len(questions_list) - 1:
             # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
-            UserActions.actions_registration(
-                request.user,
-                ActionsCodes.END_TEST,
-                course_id=course_id
-            )
             redirect_page = f'/courses/{course_id}/test/results'
         else:
             redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
@@ -252,11 +263,18 @@ def test_results_page(request, course_id):
     answer_percent = sum(user_answers) / questions_c
 
     if answer_percent <= 0.4:
-        text = "Вам бы лучше пересдать тестик..."
+        text = "Вам бы лучше пересдать тестик завтра..."
     elif answer_percent <= 0.7:
         text = "Есть куда расти"
     else:
         text = "Чудесный результат!"
+
+    UserActions.actions_registration(
+        request.user,
+        ActionsCodes.END_TEST,
+        course_id=course_id,
+        is_highest_score=True if answer_percent == 1 else False
+    )
 
     if len(user_answers) == questions_c:
         return render(
@@ -277,7 +295,6 @@ def test_results_page(request, course_id):
         HttpResponse("Сделать обработку ошибки, если количество ответов не равно количеству вопросов в тесте")
 
 def test_page(request):
-    course_operations = DBOperations(Course)
-    print(course_operations.filter_by_id(id=1))
+    UserActions.interpretate_user_actions(request.user)
 
     return HttpResponse("Hello!")

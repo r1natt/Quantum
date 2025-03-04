@@ -26,8 +26,11 @@
                 <div id="ijektj" class="text-main-content"><a href="lesson/{{ lesson.id }}">{{ lesson.name }}</a><br /></div>
               {% endfor %}
             {% endfor %}
-            {% for question in course_data.questions_group.all %}
-              <div id="ijektj" class="text-main-content"><a href="test/{{ question.id }}">{{ question.name }}</a><br /></div>
+            <!-- {% for question_group in course_data.questions_group.all %}
+              <div id="ijektj" class="text-main-content"><a href="test/{{ question_group.id }}">{{ question_group.name }}</a><br /></div>                         
+            {% endfor %} -->
+            {% for question_group in course_data.questions_group.all %}
+              <div id="ijektj" class="text-main-content"><a href="test/intro">{{ question_group.name }}</a><br /></div>                         
             {% endfor %}
             
           </div>
