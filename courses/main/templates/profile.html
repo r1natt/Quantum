@@ -13,42 +13,111 @@
 </head>
 
 <body id="ij0a6j">
-
-  {% include "header.html" %}
-
   <div id="ix0f9l" class="gjs-grid-row">
     <div id="i4sd1z" class="gjs-grid-column">
       <div id="izcaqd" class="gjs-grid-row">
-        <div id="i68dgv" class="gjs-grid-column"><img src="{% static 'images/profile.svg' %}" id="ibcd1l"/>
+        <div id="i68dgv" class="gjs-grid-column"><img alt="reshot-icon-user-7ZXA3QERGV.svg" src="{% static 'images/profile.svg' %}" id="ibcd1l"/>
           <h1 id="iyfzei" class="gjs-heading">{{ user.username }}</h1>
         </div>
+
         <div id="i8wlwa" class="gjs-grid-column">
           <h1 id="iotsyg" class="gjs-heading">Ваши курсы</h1>
+
+          {% for three in nested_list %}
+
+          <div id="iqvb06" class="gjs-grid-row">
+            {% for course in three %}
+
+              {% if course.type == None %}
+                <div id="ifwzzm-3-2-2" class="gjs-grid-column"></div>
+              {% endif %}
+
+              {% if course.type != None %}
+
+                <div id="ifwzzm" class="gjs-grid-column">
+                <h1 id="i6zj2u" class="gjs-heading">{{ course.name }}</h1>
+
+                {% if course.type == 1 %}
+                  
+                  <div id="ir58ql-4" class="text-main-content">7/7</div>
+                  <a id="ik0o3e">Чудесный результат!</a>
+                {% endif %}
+
+                {% if course.type == 2 %}
+                  <div id="ir58ql-4-5" class="text-main-content">6/7</div>
+                  <a id="igl22g">Можете пересдать завтра!</a>
+                {% endif %}
+
+                {% if course.type == 3 %}
+                  <div id="ir58ql-4-2-5" class="text-main-content">Ваш предыдущий результа:</div>
+                  <div id="ir58ql-4-5-2" class="text-main-content">6/7</div>
+                  <a id="icvxa1">Хотите пересдать?</a>
+                {% endif %}
+
+                {% if course.type == 4 %}
+                  <div id="ir58ql-4-2" class="text-main-content">Вы остановились на</div>
+                  <div id="ir58ql-4-2-2" class="text-main-content">5-м</div>
+                  <div id="ir58ql-4-2-4" class="text-main-content">вопросе, хотите продолжить? </div>
+                  <a id="im9yfl">Продолжить</a>
+                {% endif %}
+
+                {% if course.type == 5 %}
+                  <div id="ir58ql-4-2-3" class="text-main-content">Вы закончили ознакомление с теорией, хотите пройти тест?</div>
+                  <a id="im9yfl-2">Продолжить</a>
+                {% endif %}
+
+                </div>
+
+              {% endif %}
+
+            {% endfor %}
+          </div>
+
+          {% endfor %}
+
+
+          <!-- Ниже закомментирован код самих блок под каждый тип статуса курса на всякий случай -->
+          <!--
           <div id="iqvb06" class="gjs-grid-row">
             <div id="ifwzzm" class="gjs-grid-column">
-              <h1 id="i6zj2u" class="gjs-heading">Название курса длиннее</h1>
+              <h1 id="i6zj2u" class="gjs-heading">{{ course.name }}</h1>
               <div id="ir58ql-4" class="text-main-content">7/7</div><a id="ik0o3e">Чудесный результат!</a>
             </div>
-            <div id="ifwzzm-2" class="gjs-grid-column">
+            <div id="ifwzzm" class="gjs-grid-column">
               <h1 id="i6zj2u-2" class="gjs-heading">Название курса длиннее</h1>
               <div id="ir58ql-4-5" class="text-main-content">6/7</div><a id="igl22g">Можете пересдать завтра!</a>
             </div>
-            <div id="ifwzzm-2-2" class="gjs-grid-column">
+            <div id="ifwzzm" class="gjs-grid-column">
               <h1 id="i6zj2u-2-2" class="gjs-heading">Название курса длиннее</h1>
+              <div id="ir58ql-4-2-5" class="text-main-content">Ваш предыдущий результа:</div>
               <div id="ir58ql-4-5-2" class="text-main-content">6/7</div><a id="icvxa1">Хотите пересдать?</a>
             </div>
+
           </div>
+
           <div id="iqvb06-2" class="gjs-grid-row">
-            <div id="ifwzzm-3" class="gjs-grid-column">
+            <div id="ifwzzm" class="gjs-grid-column">
               <h1 id="i6zj2u-3" class="gjs-heading">Название курса длиннее</h1>
               <div id="ir58ql-4-2" class="text-main-content">Вы остановились на</div>
               <div id="ir58ql-4-2-2" class="text-main-content">5-м</div>
               <div id="ir58ql-4-2-4" class="text-main-content">вопросе, хотите продолжить? </div><a
                 id="im9yfl">Продолжить</a>
             </div>
-            <div id="ifwzzm-2-3" class="gjs-grid-column"></div>
+            <div id="ifwzzm" class="gjs-grid-column">
+              <h1 id="i6zj2u-3-2" class="gjs-heading">Название курса длиннее</h1>
+              <div id="ir58ql-4-2-3" class="text-main-content">Вы закончили ознакомление с теорией, хотите пройти тест?
+              </div><a id="im9yfl-2">Продолжить</a>
+            </div>
             <div id="ifwzzm-2-2-2" class="gjs-grid-column"></div>
           </div>
+          
+          <div id="iqvb06-2-2" class="gjs-grid-row">
+            <div id="ifwzzm-3-2-2" class="gjs-grid-column"></div>
+            <div id="ifwzzm-3-2-2" class="gjs-grid-column"></div>
+            <div id="ifwzzm-3-2-2" class="gjs-grid-column"></div>
+          </div>
+          -->
+
         </div>
       </div>
     </div>
