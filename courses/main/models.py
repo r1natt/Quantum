@@ -1,12 +1,11 @@
 from django.db import models
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models.functions import Now
 from django.core.management.base import BaseCommand
 from icecream import ic
 from enum import Enum
-import datetime
 
 """
 От бд нужно:
@@ -26,19 +25,9 @@ questions
     question у каждого вопроса есть id курса, id вопроса 
 """
 
-# class UserProfile(User):
-#     image = models.ImageField(upload_to="profile_image", blank=True)
 
-class Course(models.Model):
-    name = models.CharField(max_length=100)
-    short_desc = models.TextField(max_length=200, default="")
-    desc = models.TextField(max_length=2000, default="")
-    author = models.CharField(max_length=100)
-    create_datetime = models.DateTimeField(default=timezone.now)
-    is_visible = models.BooleanField(default=True)
-
-    @staticmethod
-    def get_nested_lists(input_list, dimension):
+class SharedManager(models.Manager):
+    def get_nested_lists(self, input_list, dimension):
         """
         В процессе верстки страниц курсов и курсов в профиле нам нужно распределить
         одномерный список курсов по строкам из 3-х, 4-х ячеек с этими курсами,
@@ -61,10 +50,24 @@ class Course(models.Model):
 
         return dimensions
 
+
+# class UserProfile(User):
+#     image = models.ImageField(upload_to="profile_image", blank=True)
+
+class Course(models.Model):
+    name = models.CharField(max_length=100)
+    short_desc = models.TextField(max_length=200, default="")
+    desc = models.TextField(max_length=2000, default="")
+    author = models.CharField(max_length=100)
+    create_datetime = models.DateTimeField(default=timezone.now)
+    is_visible = models.BooleanField(default=True)
+
+    objects = SharedManager()
+
     @staticmethod
     def get_courses_nested_list(dimension=3):
         courses = Course.objects.filter(is_visible=True)
-        return Course.get_nested_lists(courses, dimension)
+        return Course.objects.get_nested_lists(courses, dimension)
 
     @staticmethod
     def get_lessons_list(course_id):
@@ -178,6 +181,8 @@ class UserActions(models.Model):
     is_highest_score = models.BooleanField(null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
+    objects = SharedManager()
+
     @classmethod
     def actions_registration(
             self,
@@ -209,17 +214,56 @@ class UserActions(models.Model):
             )
 
     @classmethod
+    def is_user_pass_test_with_highest_score(self, user_obj, course_obj) -> bool:
+        """
+        Единственная задача данной функции вернуть булево значение, сдавал ли 
+        пользователь тест на высшую оценку когда-либо вообще?
+        """
+        
+        user_actions = UserActions.objects.filter( 
+            user=user_obj,
+            course=course_obj,
+            action_code=ActionsCodes.END_TEST.value
+        )
+
+        for user_action in user_actions:
+            if user_action.is_highest_score == True:
+                return True
+        return False
+
+    @classmethod
     def is_user_end_test(self, user_actions_list):
         is_test_started = False
         is_test_ended = False
+        is_test_expired = None  # Булево значение, но вводится только для случаев, 
+                                # когда тест не закончен, поэтому может быть не определен
+
+        test_started_action_obj = None
 
         for action in user_actions_list:
+            """
+            На этом этапе я проверяю:
+            * Начал ли пользователь выполнять тест?
+                * Если начал, я вывожу объект действия в переменную, потому что 
+                  нужно проверить когда он начал выполнять тест
+            * Закончил ли пользователь выполнять тест?
+            """
             match action.action_code:
                 case ActionsCodes.START_TEST.value:
+                    test_started_action_obj = action
                     is_test_started = True
                 case ActionsCodes.END_TEST.value:
                     is_test_ended = True
-        return (is_test_started, is_test_ended)
+
+        if test_started_action_obj is not None:
+            action_time_without_timezone = test_started_action_obj.created_at.replace(tzinfo=None)
+            print(test_started_action_obj.created_at, datetime.now() - timedelta(minutes=15))
+            if action_time_without_timezone < datetime.now() - timedelta(minutes=15):
+                is_test_expired = True
+            else:
+                is_test_expired = False
+
+        return (is_test_started, is_test_ended, is_test_expired)
 
     @classmethod
     def interpretate_user_actions(self, user_obj, course_id):
@@ -235,7 +279,9 @@ class UserActions(models.Model):
             course=course_obj
         ) # Получает записи, которые были сделаны сегодня
 
-        is_test_started, is_test_ended = UserActions.is_user_end_test(todays_user_actions)
+        is_user_hisghest_score_ever = UserActions.is_user_pass_test_with_highest_score(user_obj, course_obj)
+
+        is_test_started, is_test_ended, is_test_expired = UserActions.is_user_end_test(todays_user_actions)
 
         if is_test_started and is_test_ended:
             is_try_fired = True
@@ -245,6 +291,87 @@ class UserActions(models.Model):
         return {
             'is_test_started': is_test_started,
             'is_test_ended': is_test_ended,
+            'is_user_hisghest_score_ever': is_user_hisghest_score_ever,
+            'is_test_expired': is_test_expired,
             'is_try_fired': is_try_fired,
             'can_continue_test': can_continue_test
         }
+
+    @classmethod
+    def prettified_courses_list(self, courses_list):
+        """
+        На вход функции подается список типа: 
+            [
+                {'course_id': 3, 'type': 5}, 
+                {'course_id': 4, 'type': 5}
+            ]
+        Цель данной функции добавить в словари доп инфу о курсе
+        """
+
+        for course_info in courses_list:
+
+            courses_values = Course.objects.filter(
+                id=course_info["course_id"]
+            ).values_list("name", flat=True)
+            
+            course_info["name"] = courses_values[0]
+        return courses_list
+
+    @classmethod
+    def get_user_profile_table(self, user_obj):
+        """
+        Суть данной фукнции в парсинге курсов, с которыми у пользователя в 
+        целом есть действия.
+
+        На странице профиля различаются 5 типов блоков:
+        1) Курс завершен, тест пройден на высший балл
+        2) Курс завершен, тест пройден сегодня, но не на высший балл, предлагается пересдать завтра
+        3) Курс завершен, тест пройден вчера, есть активная кнопка "перейти к сдаче теста"
+        4) Курс завершен, тест пройден неполностью и попытка еще не сгорела, предлагается перейти к вопросу
+        5) Курс завершен, ознакомление с теорией завершено, предлагается перейти к тесту
+        """
+
+        user_courses = UserActions.objects.filter( 
+            user=user_obj,
+        ).values_list(
+            'course', flat=True
+        ).distinct()
+
+        return_list = []
+
+        for course_id in user_courses:
+            course_flags = UserActions.interpretate_user_actions(user_obj, course_id)
+
+            is_test_started = course_flags['is_test_started']
+            is_test_ended = course_flags['is_test_ended']
+            is_user_hisghest_score_ever = course_flags['is_user_hisghest_score_ever']
+            is_test_expired = course_flags['is_test_expired']
+            is_try_fired = course_flags['is_try_fired']
+            can_continue_test = course_flags['can_continue_test']
+
+            if is_user_hisghest_score_ever:
+                course_type = 1
+            elif is_test_started and is_test_ended and not(is_user_hisghest_score_ever):
+                if is_try_fired:
+                    course_type = 2
+                else:
+                    course_type = 3
+            elif is_test_started and not(is_test_ended) and not(is_test_expired):
+                course_type = 4
+            elif not(is_test_started):
+                course_type = 5
+            
+            return_list.append(
+                {
+                    "course_id": course_id,
+                    "type": course_type
+                }
+            )
+
+        return_list = UserActions.prettified_courses_list(return_list)
+
+        nested_list = UserActions.objects.get_nested_lists(return_list, 3)
+
+        print(nested_list)
+
+        return nested_list

@@ -19,19 +19,9 @@ from .models import (
     ActionsCodes
 )
 
-# from db_operations import (
-#     ActionsOp,
-#     CoursesOp,
-#     LessonsOp,
-#     QuestionsOp,
-#     AnswersOp,
-
-# )
-
 from .forms import RegisterForm
 from .course_structure import course_data
-from django.http import HttpResponse
-
+from django.http import HttpResponse, JsonResponse
 
 
 def index(request):
@@ -70,12 +60,21 @@ def logout_view(request):
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html', {"user": request.user})
+
+    user_actions_list = UserActions.get_user_profile_table(request.user)
+
+    return render(
+        request, 
+        'profile.html', 
+        {
+            "user": request.user,
+            "nested_list": user_actions_list
+        }
+    )
 
 @login_required
 def courses_overview(request):
     courses = Course.get_courses_nested_list()
-    print(courses)
     return render(
         request, 
         'courses.html', 
@@ -216,7 +215,6 @@ def question_page(request, course_id, question_id):
             is_correct,
             user_answer
         )
-        print(answer_obj)
 
         UserActions.actions_registration(
             request.user,
@@ -225,8 +223,6 @@ def question_page(request, course_id, question_id):
             question_id=question_id,
             user_answer=answer_obj
         )
-
-        print(dir(answer_obj))
         
         questions_list = Course.get_questions_list(course_id)
         question_index = questions_list.index(question_id)
@@ -295,6 +291,10 @@ def test_results_page(request, course_id):
         HttpResponse("Сделать обработку ошибки, если количество ответов не равно количеству вопросов в тесте")
 
 def test_page(request):
-    UserActions.interpretate_user_actions(request.user)
+    # ans = UserActions.interpretate_user_actions(request.user, 3)
+    # print(ans)
 
-    return HttpResponse("Hello!")
+    ans = UserActions.get_user_profile_table(request.user)
+    print(ans)
+
+    return HttpResponse(ans)
