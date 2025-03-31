@@ -1,0 +1,136 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>empty.page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'empty.css' %}">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .calculator {
+      padding: 20px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .text-main-content {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    .formula-display {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .input-group {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-group label {
+      min-width: 100px;
+      margin: 0;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 10px;
+      padding: 10px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #result span {
+      min-width: 100px;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body id="iw3mdg-2">
+
+  {% include "header.html" %}
+
+  <div id="iwcht1-2" class="gjs-grid-row">
+    <div id="ie4bdh-2" class="gjs-grid-column">
+      <div id="ieq3s9-2" class="gjs-grid-row">
+        <div id="i2rmok-2" class="gjs-grid-column">
+          <div id="ikridk-2" class="text-main-content">
+            <div class="calculator">
+              <div class="formula-display">
+                \[ Loss_{ST} = \frac{\overline{N_s}}{\overline{N_{ST}}} \]
+              </div>
+              <div class="input-group">
+                <label for="x">\(\overline{N_s}\):</label>
+                <input type="number" id="x" placeholder="Введите значение">
+              </div>
+              <div class="input-group">
+                <label for="y">\(\overline{N_{ST}}\):</label>
+                <input type="number" id="y" placeholder="Введите значение">
+              </div>
+              <div id="result">
+                <span>\(Loss_{ST}\):</span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      const x = parseFloat(document.getElementById('x').value);
+      const y = parseFloat(document.getElementById('y').value);
+      const result = document.getElementById('result');
+      const resultValue = result.querySelector('span:last-child');
+      
+      if (isNaN(x) || isNaN(y)) {
+        resultValue.innerHTML = '';
+        MathJax.typeset([result]);
+        return;
+      }
+      
+      if (y === 0) {
+        resultValue.innerHTML = 'Ошибка: деление на ноль невозможно';
+        return;
+      }
+      
+      const z = x / y;
+      resultValue.innerHTML = z.toFixed(2);
+      MathJax.typeset([result]);
+    }
+
+    // Add event listeners for dynamic calculation
+    document.getElementById('x').addEventListener('input', calculate);
+    document.getElementById('y').addEventListener('input', calculate);
+  </script>
+</body>
+
+</html>
