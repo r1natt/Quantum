@@ -1,0 +1,185 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>empty.page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'empty.css' %}">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .calculator {
+      padding: 20px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .info-text {
+      padding: 0 20px 20px 20px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .info-text p {
+      margin-bottom: 10px;
+    }
+    .info-text ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .info-text li {
+      margin-bottom: 5px;
+    }
+    .text-main-content {
+      padding: 0px;
+      border-radius: 20px;
+      background-color: #fff;
+    }
+    .calculator-header {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      padding: 20px 0 10px 0;
+    }
+    .formula-display {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .input-group {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-group label {
+      min-width: 100px;
+      margin: 0;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 10px;
+      padding: 10px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #result span {
+      min-width: 100px;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body id="iw3mdg-2">
+
+  {% include "header.html" %}
+
+  <div id="iwcht1-2" class="gjs-grid-row">
+    <div id="ie4bdh-2" class="gjs-grid-column">
+      <div id="ieq3s9-2" class="gjs-grid-row">
+        <div id="i2rmok-2" class="gjs-grid-column">
+          <div class="text-main-content">
+            <div class="calculator-header">
+              Калькулятор \(Loss_{ST}\)
+            </div>
+            <div class="info-text">
+              <p>\(Loss_{ST}\) показывает, какая доля фотонов (или энергии) теряется при прохождении через систему "ST".</p>
+              <ul>
+                <li>Если \(Loss_{ST} = 1\), потерь нет (все фотоны сохраняются).</li>
+                <li>Если \(Loss_{ST} > 1\), система вносит потери (например, из-за поглощения, рассеяния или неидеального детектирования).</li>
+                <li>Если \(Loss_{ST} < 1\), система может усиливать сигнал (что редко для пассивных оптических элементов).</li>
+              </ul>
+            </div>
+            <div class="calculator">
+              
+              <div class="formula-display">
+                \[ Loss_{ST} = \frac{\overline{N_s}}{\overline{N_{ST}}} \]
+              </div>
+              <div class="input-group">
+                <label for="x">\(\overline{N_s}\):</label>
+                <input type="number" id="x" placeholder="Введите значение">
+              </div>
+              <div class="input-group">
+                <label for="y">\(\overline{N_{ST}}\):</label>
+                <input type="number" id="y" placeholder="Введите значение">
+              </div>
+              <div class="input-group" id="result">
+                <span>\(Loss_{ST}\):</span>
+                <span></span>
+              </div>
+              <div class="input-group" id="result-db">
+                <span>\(Loss_{ST}[дБ]\):</span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      const x = parseFloat(document.getElementById('x').value);
+      const y = parseFloat(document.getElementById('y').value);
+      const result = document.getElementById('result');
+      const resultValue = result.querySelector('span:last-child');
+      const resultDb = document.getElementById('result-db');
+      const resultDbValue = resultDb.querySelector('span:last-child');
+      
+      if (isNaN(x) || isNaN(y)) {
+        resultValue.innerHTML = '';
+        resultDbValue.innerHTML = '';
+        MathJax.typeset([result, resultDb]);
+        return;
+      }
+      
+      if (y === 0) {
+        resultValue.innerHTML = 'Ошибка: деление на ноль невозможно';
+        resultDbValue.innerHTML = '';
+        return;
+      }
+      
+      const z = x / y;
+      resultValue.innerHTML = z.toFixed(2);
+      
+      // Calculate dB value
+      if (z > 0) {
+        const dbValue = 10 * Math.log10(z);
+        resultDbValue.innerHTML = dbValue.toFixed(2);
+      } else {
+        resultDbValue.innerHTML = 'Ошибка: значение должно быть положительным';
+      }
+      
+      MathJax.typeset([result, resultDb]);
+    }
+
+    // Add event listeners for dynamic calculation
+    document.getElementById('x').addEventListener('input', calculate);
+    document.getElementById('y').addEventListener('input', calculate);
+  </script>
+</body>
+
+</html>
