@@ -24,12 +24,10 @@
           <div class="text-main-content" id="iu6srs">{{ question.question_condition }}<br/></div>
           <form method="post" id="igqle7">
             {% csrf_token %}
-            <div id="iuu0el"><input type="radio" id="i49wug" name="answer" value="1"/>
-              <label id="imw2mn">{{ question.answers.0 }}</label>
-            </div>
-            <div id="iuu0el"><input type="radio" id="i3eqyp" name="answer" value="2"/><label id="imw2mn">{{ question.answers.1 }}</label></div>
-            <div id="iuu0el"><input type="radio" id="iod5qf" name="answer" value="3"/><label id="imw2mn">{{ question.answers.2 }}</label></div>
-            <div id="iuu0el"><input type="radio" id="i4yk56" name="answer" value="4"/><label id="imw2mn">{{ question.answers.3 }}</label></div>
+            <div id="iuu0el"><label id="imw2mn"><input type="radio" id="i49wug" name="answer" value="1"/>{{ question.answers.0 }}</label></div>
+            <div id="iuu0el"><label id="imw2mn"><input type="radio" id="i3eqyp" name="answer" value="2"/>{{ question.answers.1 }}</label></div>
+            <div id="iuu0el"><label id="imw2mn"><input type="radio" id="iod5qf" name="answer" value="3"/>{{ question.answers.2 }}</label></div>
+            <div id="iuu0el"><label id="imw2mn"><input type="radio" id="i4yk56" name="answer" value="4"/>{{ question.answers.3 }}</label></div>
             <button type="submit" id="i9eraa">Отправить</button>
           </form>
 
