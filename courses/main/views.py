@@ -58,6 +58,9 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
+def calc_view(request):
+    return render(request, 'calc.html')
+
 @login_required
 def profile(request):
 
@@ -172,8 +175,8 @@ def test_intro(request, course_id):
             }
         )
 
-def get_user_answer(request_obj) -> int:
-    return int(request_obj.POST['answer'])
+def get_user_answer(request_obj) -> int | None:
+    return int(request_obj.POST['answer']) if 'answer' in request_obj.POST.keys() else None
 
 @login_required
 def question_page(request, course_id, question_id):
@@ -196,6 +199,9 @@ def question_page(request, course_id, question_id):
     if request.method == "POST":
         user_answer = get_user_answer(request)
         is_correct = False
+
+        if user_answer is None:
+            return redirect(f"/courses/{course_id}/test/{question_id}")
 
         if user_answer == int(question.correct_answer):
             """
@@ -224,14 +230,13 @@ def question_page(request, course_id, question_id):
             user_answer=answer_obj
         )
         
-        questions_list = Course.get_questions_list(course_id)
-        question_index = questions_list.index(question_id)
+        next_question_id = Question.get_next_question_id(course_id, question_id)
         
-        if question_index == len(questions_list) - 1:
+        if next_question_id is None:
             # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
             redirect_page = f'/courses/{course_id}/test/results'
         else:
-            redirect_page = f'/courses/{course_id}/test/{questions_list[question_index + 1]}'
+            redirect_page = f'/courses/{course_id}/test/{next_question_id}'
         return redirect(redirect_page)
 
     UserActions.actions_registration(
@@ -253,10 +258,18 @@ def question_page(request, course_id, question_id):
 
 @login_required
 def test_results_page(request, course_id):
-    user_answers = UserAnswer.get_user_answers(request.user, course_id=course_id)
-    questions_c = Questions_Group.questions_count(course_id)
+    
+    UserActions.actions_registration(
+        request.user,
+        ActionsCodes.END_TEST,
+        course_id=course_id
+    )
 
-    answer_percent = sum(user_answers) / questions_c
+    this_try_result = UserActions.get_last_try_result(request.user, course_id)
+
+    print(this_try_result)
+
+    answer_percent = this_try_result["correct_answers_count"] / this_try_result["all_answers_count"]
 
     if answer_percent <= 0.4:
         text = "Вам бы лучше пересдать тестик завтра..."
@@ -265,36 +278,58 @@ def test_results_page(request, course_id):
     else:
         text = "Чудесный результат!"
 
-    UserActions.actions_registration(
-        request.user,
-        ActionsCodes.END_TEST,
-        course_id=course_id,
-        is_highest_score=True if answer_percent == 1 else False
-    )
+        """
+        Ниже приведен костыль, на этом костыле все и держиться. 
+        
+        Дело в том, что если пользователь хоть раз сдал тест на высший балл, 
+        на странице прогресса я должен фиксировать высший балл всегда.
 
-    if len(user_answers) == questions_c:
-        return render(
-            request, 
-            'results.html', 
-            {
-                "user": request.user, 
-                "course_obj": Course.objects.get(id=course_id),
-                "question_group": Questions_Group.objects.filter(
-                    course=Course.objects.get(id=course_id)
-                ).first(),
-                "correct_answers": sum(user_answers),
-                "questions_count": questions_c,
-                "text": text
-            }
+        При сборке страницы с прогрессом я всегда определяю сдал ли пользователь 
+        хоть раз тест на высший балл или нет. Проблема создается на моменте 
+        подсчета ответов в нынешнем тесте. Чтобы подсчитать правильные ответы я 
+        сначала определяю какое событие имеет код завершения теста, значит далее
+        идут события ответа на вопросы и я их паршу до момента события начала 
+        теста. 
+        
+        Проблема в том, что событие конца теста, уже должно содержать инфу о том, 
+        сдал ли пользователь на высший балл или нет. Поэтому я сначала делаю 
+        событие окончания теста в этой же функции в самом начале и уже потом, 
+        если пользователь сдал на высший балл, я создаю идентичное событие, но 
+        с указанием, что данный тест завершен на высший балл.
+
+        UPDATE: Теперь вся эта логика происходит не просто со статусом END_TEST, 
+        а END_TEST_HIGHEST_SCORE, тем самым логически разделяя эти статусы.
+        """
+
+        UserActions.actions_registration(
+            request.user,
+            ActionsCodes.END_TEST_HIGHEST_SCORE,
+            course_id=course_id, 
+            is_highest_score=True
         )
-    else:
-        HttpResponse("Сделать обработку ошибки, если количество ответов не равно количеству вопросов в тесте")
+
+    return render(
+        request, 
+        'results.html', 
+        {
+            "user": request.user, 
+            "course_obj": Course.objects.get(id=course_id),
+            "question_group": Questions_Group.objects.filter(
+                course=Course.objects.get(id=course_id)
+            ).first(),
+            "results": this_try_result,
+            "text": text
+        }
+    )
 
 def test_page(request):
     # ans = UserActions.interpretate_user_actions(request.user, 3)
     # print(ans)
 
-    ans = UserActions.get_user_profile_table(request.user)
-    print(ans)
-
-    return HttpResponse(ans)
+    return render(
+        request, 
+        "test.html",
+        {
+            "text": text
+        }
+    )

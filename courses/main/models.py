@@ -115,6 +115,16 @@ class Question(models.Model):
     correct_answer = models.IntegerField(default=0)
     question_group = models.ForeignKey(Questions_Group, related_name='question', on_delete=models.CASCADE)
 
+    @classmethod
+    def get_next_question_id(self, course_id, question_id) -> int | None:
+        questions_list = Course.get_questions_list(course_id)
+        question_index = questions_list.index(question_id)
+
+        if question_index + 1 >= len(questions_list):
+            return None
+
+        return questions_list[question_index + 1]
+
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     is_correct = models.BooleanField()
@@ -134,16 +144,14 @@ class UserAnswer(models.Model):
     @classmethod
     def save_user_answer(self, user_obj, course_id, question, is_correct, user_answer):
         course = Course.objects.get(id=course_id)
-        
-        is_in_db = UserAnswer.check_user_answer_exist(user_obj, course, question)
-        if not is_in_db:
-            return UserAnswer.objects.create(
-                user=user_obj,
-                course=course,
-                question=question,
-                is_correct=is_correct,
-                answer=user_answer
-            )
+
+        return UserAnswer.objects.create(
+            user=user_obj,
+            course=course,
+            question=question,
+            is_correct=is_correct,
+            answer=user_answer
+        )
 
     @classmethod
     def get_user_answers(self, user, course_id) -> list[bool]:
@@ -167,6 +175,7 @@ class ActionsCodes(Enum):
     OPEN_QUESTION = 3
     QUESTION_ANSWER = 4
     END_TEST = 5
+    END_TEST_HIGHEST_SCORE = 7
 
 """
 Таблица UserActions нужна, чтобы фиксировать незаконченные курсы, а также 
@@ -223,7 +232,7 @@ class UserActions(models.Model):
         user_actions = UserActions.objects.filter( 
             user=user_obj,
             course=course_obj,
-            action_code=ActionsCodes.END_TEST.value
+            action_code=ActionsCodes.END_TEST_HIGHEST_SCORE.value
         )
 
         for user_action in user_actions:
@@ -316,6 +325,80 @@ class UserActions(models.Model):
             
             course_info["name"] = courses_values[0]
         return courses_list
+    
+    @classmethod
+    def get_last_question_in_unfinished_test(self, user_obj, course_id):
+        course_user_actions = UserActions.objects.filter( 
+            user=user_obj,
+            course_id=course_id
+        ).all()
+
+        is_end_test = False
+        
+        actions_before_start_test = []
+
+        for action in reversed(course_user_actions):
+            if action.action_code == ActionsCodes.END_TEST.value:
+                is_end_test = True
+            elif action.action_code == ActionsCodes.START_TEST.value and not(is_end_test):
+                break
+            elif action.action_code == ActionsCodes.QUESTION_ANSWER.value:
+                actions_before_start_test.append(action)
+    
+        print(actions_before_start_test)
+
+        next_question_id = Question.get_next_question_id(
+            course_id, 
+            len(actions_before_start_test) + 1
+        )
+        """
+        Код выше буквально говорит: я знаю, что пользователь не закончил тест 
+        курса course_id, но я знаю, что он ответил на 
+        len(actions_before_start_test) вопросов, какой следующий вопрос? 
+        """
+
+        result = {
+            "next_question_index": len(actions_before_start_test) + 1, 
+            # пользователь ответил на len(actions_before_start_test) вопросов, 
+            # значит индекс следующего будет +1
+            "next_question_id": next_question_id
+        }
+
+        return result
+    
+    @classmethod
+    def get_last_try_result(self, user_obj, course_id):
+        """
+        Эта функция выполняется только в том случае, когда мы точно уверены, что
+        пользователь завершил тест
+        """
+
+        course_user_actions = UserActions.objects.filter(
+            user=user_obj,
+            course_id=course_id
+        ).all()
+        print(course_user_actions)
+
+        is_end_test = False
+        correct_answers_count = 0
+        all_answers_count = 0
+
+        for action in reversed(course_user_actions):
+            if action.action_code == ActionsCodes.END_TEST.value:
+                is_end_test = True
+            elif is_end_test and action.action_code == ActionsCodes.QUESTION_ANSWER.value:
+                all_answers_count += 1
+
+                if UserAnswer.objects.filter(id=action.user_answer_id).first().is_correct:
+                    correct_answers_count += 1
+
+            elif action.action_code == ActionsCodes.START_TEST.value:
+                break
+
+        return {
+            "correct_answers_count": correct_answers_count,
+            "all_answers_count": all_answers_count
+        }
 
     @classmethod
     def get_user_profile_table(self, user_obj):
@@ -340,6 +423,10 @@ class UserActions(models.Model):
         return_list = []
 
         for course_id in user_courses:
+            course_info_dict = {
+                "course_id": course_id
+            }
+
             course_flags = UserActions.interpretate_user_actions(user_obj, course_id)
 
             is_test_started = course_flags['is_test_started']
@@ -351,22 +438,32 @@ class UserActions(models.Model):
 
             if is_user_hisghest_score_ever:
                 course_type = 1
+
+                last_try_result = UserActions.get_last_try_result(user_obj, course_id)
+
+                course_info_dict["last_try_info"] = last_try_result
+
             elif is_test_started and is_test_ended and not(is_user_hisghest_score_ever):
                 if is_try_fired:
                     course_type = 2
                 else:
                     course_type = 3
-            elif is_test_started and not(is_test_ended) and not(is_test_expired):
+
+                last_try_result = UserActions.get_last_try_result(user_obj, course_id)
+
+                course_info_dict["last_try_info"] = last_try_result
+
+            elif is_test_started and not(is_test_ended) and not(is_test_expired):                
                 course_type = 4
+
+                next_question_info = UserActions.get_last_question_in_unfinished_test(user_obj, course_id)
+                course_info_dict["next_question_info"] = next_question_info
             elif not(is_test_started):
                 course_type = 5
+
+            course_info_dict["type"] = course_type
             
-            return_list.append(
-                {
-                    "course_id": course_id,
-                    "type": course_type
-                }
-            )
+            return_list.append(course_info_dict)
 
         return_list = UserActions.prettified_courses_list(return_list)
 
