@@ -2,9 +2,9 @@
 
 <html lang="en">
   <head>
-    <title>Login</title>
+    <title>Registration</title>
     <link rel="stylesheet" href="{% static 'register.css' %}">
-	<style>
+    <style>
 		* {
 		  font-family: 'Roboto', sans-serif;
 		}
@@ -139,19 +139,27 @@
 	</style>
   </head>
 
-  <body id="itk5xa">
-		<div class="foot-form-cont" id="i4tohk">
-			<div class="gjs-grid-row" id="ipig1q">
-				<div class="gjs-grid-column" id="ipixn7">
-					<div class="foot-form-title" id="i62sb9">Регистрация в Quantum</div>
-						<form method="post">
-							{% csrf_token %}
-							{{ form.as_p }}
-							<button type="sumbit" class="sub-btn">Зарегистрироваться</button>
-						</form>
-					</div>
-				</div>
-			</div>
-	  </div>
+  <body>
+    <div class="foot-form-cont">
+        <div class="foot-form-title">Регистрация в Quantum</div>
+        <form method="post">
+            {% csrf_token %}
+            <p>
+                <label for="id_username">Username:</label>
+                <input type="text" name="username" maxlength="150" required id="id_username">
+                <span class="helptext">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+            </p>
+            <p>
+                <label for="id_password">Password:</label>
+                <input type="password" name="password" required id="id_password">
+            </p>
+            <p>
+                <label for="id_password_confirm">Confirm Password:</label>
+                <input type="password" name="password_confirm" required id="id_password_confirm">
+            </p>
+            <button type="submit" class="sub-btn">Зарегистрироваться</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
   </body>
 </html>

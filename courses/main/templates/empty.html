@@ -18,11 +18,31 @@
       max-width: 300px;
       margin: 0 auto;
     }
+    .info-text {
+      padding: 0 20px 20px 20px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .info-text p {
+      margin-bottom: 10px;
+    }
+    .info-text ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .info-text li {
+      margin-bottom: 5px;
+    }
     .text-main-content {
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 0px;
+      border-radius: 20px;
       background-color: #fff;
+    }
+    .calculator-header {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      padding: 20px 0 10px 0;
     }
     .formula-display {
       text-align: center;
@@ -80,8 +100,20 @@
     <div id="ie4bdh-2" class="gjs-grid-column">
       <div id="ieq3s9-2" class="gjs-grid-row">
         <div id="i2rmok-2" class="gjs-grid-column">
-          <div id="ikridk-2" class="text-main-content">
+          <div class="text-main-content">
+            <div class="calculator-header">
+              Калькулятор \(Loss_{ST}\)
+            </div>
+            <div class="info-text">
+              <p>\(Loss_{ST}\) показывает, какая доля фотонов (или энергии) теряется при прохождении через систему "ST".</p>
+              <ul>
+                <li>Если \(Loss_{ST} = 1\), потерь нет (все фотоны сохраняются).</li>
+                <li>Если \(Loss_{ST} > 1\), система вносит потери (например, из-за поглощения, рассеяния или неидеального детектирования).</li>
+                <li>Если \(Loss_{ST} < 1\), система может усиливать сигнал (что редко для пассивных оптических элементов).</li>
+              </ul>
+            </div>
             <div class="calculator">
+              
               <div class="formula-display">
                 \[ Loss_{ST} = \frac{\overline{N_s}}{\overline{N_{ST}}} \]
               </div>
@@ -93,8 +125,12 @@
                 <label for="y">\(\overline{N_{ST}}\):</label>
                 <input type="number" id="y" placeholder="Введите значение">
               </div>
-              <div id="result">
+              <div class="input-group" id="result">
                 <span>\(Loss_{ST}\):</span>
+                <span></span>
+              </div>
+              <div class="input-group" id="result-db">
+                <span>\(Loss_{ST}[дБ]\):</span>
                 <span></span>
               </div>
             </div>
@@ -110,21 +146,34 @@
       const y = parseFloat(document.getElementById('y').value);
       const result = document.getElementById('result');
       const resultValue = result.querySelector('span:last-child');
+      const resultDb = document.getElementById('result-db');
+      const resultDbValue = resultDb.querySelector('span:last-child');
       
       if (isNaN(x) || isNaN(y)) {
         resultValue.innerHTML = '';
-        MathJax.typeset([result]);
+        resultDbValue.innerHTML = '';
+        MathJax.typeset([result, resultDb]);
         return;
       }
       
       if (y === 0) {
         resultValue.innerHTML = 'Ошибка: деление на ноль невозможно';
+        resultDbValue.innerHTML = '';
         return;
       }
       
       const z = x / y;
       resultValue.innerHTML = z.toFixed(2);
-      MathJax.typeset([result]);
+      
+      // Calculate dB value
+      if (z > 0) {
+        const dbValue = 10 * Math.log10(z);
+        resultDbValue.innerHTML = dbValue.toFixed(2);
+      } else {
+        resultDbValue.innerHTML = 'Ошибка: значение должно быть положительным';
+      }
+      
+      MathJax.typeset([result, resultDb]);
     }
 
     // Add event listeners for dynamic calculation

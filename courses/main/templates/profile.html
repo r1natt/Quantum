@@ -13,6 +13,9 @@
 </head>
 
 <body id="ij0a6j">
+
+  {% include "header.html" %}
+
   <div id="ix0f9l" class="gjs-grid-row">
     <div id="i4sd1z" class="gjs-grid-column">
       <div id="izcaqd" class="gjs-grid-row">
@@ -39,31 +42,31 @@
 
                 {% if course.type == 1 %}
                   
-                  <div id="ir58ql-4" class="text-main-content">7/7</div>
+                  <div id="ir58ql-4" class="text-main-content">{{ course.last_try_info.correct_answers_count }}/{{ course.last_try_info.all_answers_count }}</div>
                   <a id="ik0o3e">Чудесный результат!</a>
                 {% endif %}
 
                 {% if course.type == 2 %}
-                  <div id="ir58ql-4-5" class="text-main-content">6/7</div>
+                  <div id="ir58ql-4-5" class="text-main-content">{{ course.last_try_info.correct_answers_count }}/{{ course.last_try_info.all_answers_count }}</div>
                   <a id="igl22g">Можете пересдать завтра!</a>
                 {% endif %}
 
                 {% if course.type == 3 %}
-                  <div id="ir58ql-4-2-5" class="text-main-content">Ваш предыдущий результа:</div>
-                  <div id="ir58ql-4-5-2" class="text-main-content">6/7</div>
-                  <a id="icvxa1">Хотите пересдать?</a>
+                  <div id="ir58ql-4-2-5" class="text-main-content">Ваш предыдущий результат:</div>
+                  <div id="ir58ql-4-5-2" class="text-main-content">{{ course.last_try_info.correct_answers_count }}/{{ course.last_try_info.all_answers_count }}</div>
+                  <a id="icvxa1" href="/courses/{{ course.course_id }}/test/intro">Хотите пересдать?</a>
                 {% endif %}
 
                 {% if course.type == 4 %}
                   <div id="ir58ql-4-2" class="text-main-content">Вы остановились на</div>
-                  <div id="ir58ql-4-2-2" class="text-main-content">5-м</div>
+                  <div id="ir58ql-4-2-2" class="text-main-content">{{ course.next_question_info.next_question_index }}-м</div>
                   <div id="ir58ql-4-2-4" class="text-main-content">вопросе, хотите продолжить? </div>
-                  <a id="im9yfl">Продолжить</a>
+                  <a id="im9yfl" href="/courses/{{ course.course_id }}/test/{{ course.next_question_info.next_question_id }}">Продолжить</a>
                 {% endif %}
 
                 {% if course.type == 5 %}
                   <div id="ir58ql-4-2-3" class="text-main-content">Вы закончили ознакомление с теорией, хотите пройти тест?</div>
-                  <a id="im9yfl-2">Продолжить</a>
+                  <a id="im9yfl-2" href="/courses/{{ course.course_id }}/test/intro">Перейти к тесту</a>
                 {% endif %}
 
                 </div>

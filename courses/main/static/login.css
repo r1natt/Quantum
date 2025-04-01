@@ -171,7 +171,7 @@ body {
 .sub-btn{
 	width:100%;
 	margin:15px 0;
-	background-color:#785580;
+	background-color:rgba(0, 91, 202, 1);
 	border:none;
 	color:#fff;
 	border-radius:2px;
@@ -180,10 +180,10 @@ body {
 	cursor:pointer;
 }
 .sub-btn:hover{
-	background-color:#91699a;
+	background-color:rgba(0, 91, 202, 1);
 }
 .sub-btn:active{
-	background-color:#573f5c;
+	background-color:rgba(0, 91, 202, 1);
 }
 
 @media (max-width:992px) {
