@@ -89,8 +89,9 @@ body {
 }
 
 #i4sd1z {
+	width: 100%;
 	max-width: 1200px;
-	align-items: center;
+	align-items: flex-start;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -105,10 +106,7 @@ body {
 	border-top-right-radius: 30px;
 	border-bottom-right-radius: 30px;
 	border-bottom-left-radius: 30px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	padding-left: 10px;
-	padding-right: 10px;
+	padding: 10px;
 	background-color: #03346E;
 }
 
@@ -131,21 +129,22 @@ body {
 	color: #475569;
 }
 
-#i68dgv {
-	flex-basis: 35%;
-	flex-grow: 0;
-	margin-right: 10px;
-	max-width: 200px;
+#izcaqd {
+	display: flex;
+	justify-content: flex-start;
+	width: calc(100% - 10px);
 }
 
-#izcaqd {
-	padding-top: 0px;
-	padding-bottom: 0px;
+#i68dgv {
+	width: 25%;
+	flex: 0 0 25%;
+	margin-right: 10px;
 }
 
 #i8wlwa {
-	padding-top: 0px;
-	padding-bottom: 0px;
+	width: 75%;
+	flex: 0 0 75%;
+	min-height: 100px;
 }
 
 #i6zj2u {
@@ -613,7 +612,7 @@ body {
 	flex-direction: column;
 }
 
-#iqvb06-2-2 {
+#iqvb06-2 {
 	gap: 10px;
 	padding-top: 0px;
 	padding-bottom: 0px;
