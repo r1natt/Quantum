@@ -1,6 +1,18 @@
 #markdown_div {
 	line-height: 30px;
 	font-size: 1.2rem;
+	padding: 20px;
+}
+
+.markdown_div * {
+    padding-left: 10px;
+}
+
+.markdown_div ol, .markdown_div li {
+    padding-left: 0;
+    margin-left: 20px;
+    line-height: 30px;
+    font-size: 1.2rem;
 }
 
 .markdown_div p {
