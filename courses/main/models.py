@@ -41,9 +41,10 @@ class SharedManager(models.Manager):
         for n, course in enumerate(input_list):
             del list_of_dimension[n % dimension]
             list_of_dimension.insert(n % dimension, course)
-            if n + 1 == dimension:
+            if (n + 1) % dimension == 0:
                 dimensions.append(list_of_dimension)
                 list_of_dimension = [None for _ in range(dimension)]
+            print(list_of_dimension)
 
         if any(list_of_dimension):
             dimensions.append(list_of_dimension)
@@ -67,6 +68,7 @@ class Course(models.Model):
     @staticmethod
     def get_courses_nested_list(dimension=3):
         courses = Course.objects.filter(is_visible=True)
+        print(courses)
         return Course.objects.get_nested_lists(courses, dimension)
 
     @staticmethod
@@ -334,6 +336,7 @@ class UserActions(models.Model):
         ).all()
 
         is_end_test = False
+        last_answer_question_id = None
         
         actions_before_start_test = []
 
@@ -343,13 +346,15 @@ class UserActions(models.Model):
             elif action.action_code == ActionsCodes.START_TEST.value and not(is_end_test):
                 break
             elif action.action_code == ActionsCodes.QUESTION_ANSWER.value:
+                if last_answer_question_id is None:
+                    last_answer_question_id = action.question.id
                 actions_before_start_test.append(action)
     
         print(actions_before_start_test)
 
         next_question_id = Question.get_next_question_id(
             course_id, 
-            len(actions_before_start_test) + 1
+            last_answer_question_id
         )
         """
         Код выше буквально говорит: я знаю, что пользователь не закончил тест 

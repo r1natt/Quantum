@@ -78,6 +78,7 @@ def profile(request):
 @login_required
 def courses_overview(request):
     courses = Course.get_courses_nested_list()
+    print(courses)
     return render(
         request, 
         'courses.html', 
@@ -171,7 +172,7 @@ def test_intro(request, course_id):
                 "user": request.user,
                 "first_question_id": Course.objects.filter(
                     id=course_id
-                    ).first().questions_group.first().id
+                    ).first().questions_group.first().question.first().id
             }
         )
 
