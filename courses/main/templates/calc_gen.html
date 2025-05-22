@@ -1,0 +1,91 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Калькуляторы</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'calc_gen.css' %}">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body id="isq60w-2">
+  {% include "header.html" %}
+
+  <div id="i0a14h-2" class="gjs-grid-row">
+    <div id="iawajf-2" class="gjs-grid-column">
+      <div id="ip82cb-2">
+        <div id="i83gr9">Калькуляторы</div>
+      </div>
+      {% for threes in calcs_list %}
+
+      <div id="i12m0a-2" class="gjs-grid-row">
+
+        {% for calc in threes %}
+
+        {% if calc != None %}
+        <div id="irkfhs-2" class="gjs-grid-column">
+          <h1 id="iy0tlu-2" class="gjs-heading">{{ calc.name }}<br/></h1>
+          <div id="id9pyk-2" class="text-main-content">
+            <span id="ij3edk-2">{{ calc.short_desc }}<br/></span>
+          </div>
+          <a id="iunmmi-2" class="gjs-button" href="{{ calc.url }}">Перейти</a>
+        </div>
+        {% endif %}
+				{% if calc == None %}
+        <div id="iabrpf-2" class="gjs-grid-column"></div>
+        {% endif %}
+
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <!-- <div id="i12m0a-2" class="gjs-grid-row">
+        
+        <div id="irkfhs-2" class="gjs-grid-column">
+          <h1 id="iy0tlu-2" class="gjs-heading">Квантовая механика<br/></h1>
+          <div id="id9pyk-2" class="text-main-content">
+            <span id="ij3edk-2">Lorem ipsum dolor sit amet, co asdas asd asdasdd asdd fsdferw wer sdasdf sdffdsdf sdffsdf sdffaqwe ewgsvxcvr <br/></span>
+          </div>
+          <div id="i68fio-2" class="text-main-content">
+            <span id="i93sad-2">Катюха<br/></span>
+          </div>
+          <a id="iunmmi-2" class="gjs-button">Перейти к Курсу!</a>
+        </div>
+        <div id="ih2cs3-2" class="gjs-grid-column">
+          <h1 id="iumdeg-2" class="gjs-heading">Квантовая механика<br/></h1>
+          <div id="iy4xnw-2" class="text-main-content"><span id="ihz4lk-2">Lorem ipsum <br/><br/></span></div>
+          <div id="idsurb-2" class="text-main-content"><span id="ibkse6-2">Катюха<br/></span></div><a id="i0yqcq-2"
+            class="gjs-button">Перейти к Курсу!</a>
+        </div>
+        <div id="i31iwy-2" class="gjs-grid-column">
+          <h1 id="i58t8z-2" class="gjs-heading">Квантовая механика<br/></h1>
+          <div id="izifz1-2" class="text-main-content">
+            <span id="idtzdh-2">Lorem ipsum dolor sit amet, co asdas asd asdasdd asdd fsdferw wer sdasdf sdffdsdf sdffsdf sdffaqwe ewgsvxcvr <br/></span>
+          </div>
+          <div id="iw6egn-2" class="text-main-content"><span id="i31hsi-2">Катюха<br/></span></div><a id="i711em-2"
+            class="gjs-button">Перейти к Курсу!</a>
+        </div>
+      </div>
+      <div id="ik40xc-2" class="gjs-grid-row">
+        <div id="i5fm1e-2" class="gjs-grid-column">
+          <h1 id="izt79o-2" class="gjs-heading">Квантовая механика<br/></h1>
+          <div id="i98pqc-2" class="text-main-content">
+            <span id="ipm4py-2">Lorem ipsum dolor sit amet, co asdas asd asdasdd asdd fsdferw wer sdasdf sdffdsdf sdffsdf sdffaqwe ewgsvxcvr <br/></span>
+          </div>
+          <div id="iz7aq4-2" class="text-main-content"><span id="i1tgym-2">Катюха<br/></span></div><a id="i872qu-2"
+            class="gjs-button">Перейти к Курсу!</a>
+        </div>
+        <div id="iabrpf-2" class="gjs-grid-column"></div>
+        <div id="iq70h3-2" class="gjs-grid-column"></div>
+      </div> -->
+    </div>
+  </div>
+</body>
+
+</html>
