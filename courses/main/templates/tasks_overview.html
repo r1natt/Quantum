@@ -1,0 +1,57 @@
+{% load static %}
+{% load markd %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Задачи</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'tasks_overview.css' %}">
+  <link rel="stylesheet" href="{% static 'markdown.css' %}">
+</head>
+
+<body id="isq60w-2-2">
+
+  {% include "header.html" %}
+
+  <div id="i0a14h-2-2" class="gjs-grid-row">
+    <div id="iawajf-2-2" class="gjs-grid-column">
+      <div id="ip82cb-2-2">
+        <div id="i83gr9-2">Решение задач</div>
+      </div>
+
+      {% for threes in nested_list %}
+
+      <div id="i12m0a-2-2" class="gjs-grid-row">
+
+        {% for task_group in threes %}
+
+        {% if task_group != None %}
+        <div id="irkfhs-2-2" class="gjs-grid-column">
+          <h1 id="iy0tlu-2-2" class="gjs-heading">{{ task_group.name }}<br/></h1>
+          <div id="id9pyk-2-2" class="text-main-content">
+            <span id="ij3edk-2-2">{{ task_group.description }}<br/></span>
+          </div>
+          <div id="i68fio-2-2" class="text-main-content">
+            <span id="i93sad-2-2">{{ task_group.author }}<br/></span>
+          </div>
+          <a id="iunmmi-2-2" class="gjs-button" href="{{ task_group.id }}">Перейти к задачам!</a>
+        </div>
+        {% endif %}
+				{% if task_group == None %}
+        <div id="iabrpf-2-2" class="gjs-grid-column"></div>
+        {% endif %}
+
+        {% endfor %}
+      </div>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

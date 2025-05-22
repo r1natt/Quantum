@@ -174,6 +174,7 @@ class ActionsCodes(Enum):
     OPEN_COURSE = 1
     OPEN_LESSON = 2
     START_TEST = 6
+    START_TASK = 7
     OPEN_QUESTION = 3
     QUESTION_ANSWER = 4
     END_TEST = 5
@@ -477,3 +478,41 @@ class UserActions(models.Model):
         print(nested_list)
 
         return nested_list
+
+class TaskGroup(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    author = models.CharField(max_length=100)
+    is_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    @staticmethod
+    def nested_list(dimension=3):
+        task_groups = TaskGroup.objects.filter(is_visible=True)
+        return Course.objects.get_nested_lists(task_groups, dimension)
+
+    @staticmethod
+    def tasks_list(task_group_id):
+        tasks = TaskGroup.objects.filter(id=task_group_id).first().task_group.all()
+        return tasks
+
+    def next_task_id(task_group_id, task_id) -> int | None:
+        tasks = TaskGroup.tasks_list(task_group_id)
+
+        tasks_list = []
+        for task in tasks:
+            tasks_list.append(task.id)
+
+        task_index = tasks_list.index(task_id)
+
+        if task_index + 1 >= len(tasks_list):
+            return None
+
+        return tasks_list[task_index + 1]
+
+class Task(models.Model):
+    name = models.CharField(max_length=100)
+    text = models.TextField()
+    answer = models.TextField()
+    tasks_group = models.ForeignKey(TaskGroup, related_name='task_group', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)

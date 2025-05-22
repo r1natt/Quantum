@@ -6,7 +6,9 @@ from .models import (
     Questions_Group, 
     Question, 
     UserAnswer,
-    UserActions
+    UserActions,
+    TaskGroup,
+    Task
 )
 
 admin.site.register(Course)
@@ -16,3 +18,5 @@ admin.site.register(Questions_Group)
 admin.site.register(Question)
 admin.site.register(UserAnswer)
 admin.site.register(UserActions)
+admin.site.register(TaskGroup)
+admin.site.register(Task)

@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-@&-0&&oh+6@zn&5b#4xib)gjbhppd6%utzm=#b!c8kt(rj&)i_
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "185.250.44.89", 
+    "193.187.96.229", 
     "quantum.rinatt.site", 
     "127.0.0.1",
     "quantum-courses.space"
@@ -140,11 +140,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = '/home/lewis/quantum/courses/main/static'
+STATIC_ROOT = '/home/lewis/qntm/courses/main/static'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "main", "static"),  # Локальная папка
-    # "/home/lewis/quantum/main/static",  # Папка на сервере
+    "/home/lewis/qntm/courses/main/static",  # Папка на сервере
 ]
 
 # Default primary key field type

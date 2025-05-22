@@ -16,6 +16,10 @@ from .models import (
     Question,
     UserAnswer,
     UserActions,
+
+    TaskGroup,
+    Task,
+
     ActionsCodes
 )
 
@@ -58,8 +62,35 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
-def calc_view(request):
-    return render(request, 'calc.html')
+def calc_loss(request):
+    return render(request, 'calc_loss.html')
+
+def calc_photo(request):
+    return render(request, 'calc_photo.html')
+
+def calcs_page(request):
+    calcs_list = [
+        [
+            {
+                "name": "Калькулятор \(Loss_{ST}\)",
+                # "short_desc": "Спросить у Кати текст",
+                "url": "/calc_loss"
+            },
+            {
+                "name": "Внешний фотоэффект",
+                # "short_desc": "Спросить у Кати текст",
+                "url": "/calc_photo"
+            },
+            None,
+        ]
+    ]
+    return render(
+        request, 
+        'calc_gen.html',
+        {
+            'calcs_list': calcs_list
+        }
+    )
 
 @login_required
 def profile(request):
@@ -308,6 +339,99 @@ def test_results_page(request, course_id):
             course_id=course_id, 
             is_highest_score=True
         )
+
+    return render(
+        request, 
+        'results.html', 
+        {
+            "user": request.user, 
+            "course_obj": Course.objects.get(id=course_id),
+            "question_group": Questions_Group.objects.filter(
+                course=Course.objects.get(id=course_id)
+            ).first(),
+            "results": this_try_result,
+            "text": text
+        }
+    )
+
+@login_required
+def tasks_overview(request):
+    task_groups = TaskGroup.nested_list()
+    print(task_groups)
+    return render(
+        request, 
+        'tasks_overview.html', 
+        {
+            "user": request.user,
+            "nested_list": task_groups
+        }
+    )
+
+@login_required
+def task_page(request, task_group_id):
+    tasks = TaskGroup.tasks_list(task_group_id)
+    print(tasks)
+    return redirect(f'/tasks/{task_group_id}/{tasks[0].id}')
+
+def tasks_user_answer(request_obj) -> int | None:
+    return request_obj.POST['answer'] if 'answer' in request_obj.POST.keys() else None
+
+def compare_numbers(user_answer, task_answer, tol=1e-12):
+    num1 = float(user_answer)
+    num2 = float(task_answer)
+    return abs(num1 - num2) <= tol
+
+@login_required
+def task(request, task_group_id, task_id):
+
+    task_data = Task.objects.filter(id=task_id).first()
+    
+    
+    if request.method == "POST":
+        user_answer = tasks_user_answer(request)
+        is_correct = False
+
+        if user_answer is None:
+            return redirect(f"/tasks/{task_group_id}/{task_id}")
+
+        if compare_numbers(user_answer, task_data.answer):
+            is_correct = True
+            print(f'task_id: {task_id} - correct answer! ({user_answer})')
+        
+        next_question_id = TaskGroup.next_task_id(task_group_id, task_id)
+        
+        if next_question_id is None:
+            # Проверяю есть ли следующий вопрос и если его нет, то направляю на страницу результатов
+            # redirect_page = f'/tasks/{task_group_id}/results'
+            redirect_page = f'/tasks'
+        else:
+            redirect_page = f'/tasks/{task_group_id}/{next_question_id}'
+        return redirect(redirect_page)
+
+    return render(
+        request, 
+        'task_page.html', 
+        {
+            "user": request.user, 
+            "task_group_name": task_data.tasks_group.name,
+            "task": task_data
+        }
+    )
+
+def task_results(request, task_group_id, task_id):
+    UserActions.actions_registration(
+        request.user,
+        ActionsCodes.END_TEST,
+        course_id=course_id
+    )
+
+    this_try_result = UserActions.get_last_try_result(request.user, course_id)
+
+    print(this_try_result)
+
+    answer_percent = this_try_result["correct_answers_count"] / this_try_result["all_answers_count"]
+
+    text = "Вы всегда можете вернуться к задачам"
 
     return render(
         request, 
