@@ -21,6 +21,7 @@ urlpatterns = [
     path("tasks/", views.tasks_overview, name="tasks_overview"),
     path("tasks/<int:task_group_id>", views.task_page, name="task_page"),
     path("tasks/<int:task_group_id>/<int:task_id>", views.task, name="task"),
-
+    path("calc_simulator/", views.calc_simulator, name="simulator"),
+    
     path("test", views.test_page, name="test page")
 ]

@@ -140,7 +140,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = '/home/lewis/qntm/courses/main/static'
+STATIC_ROOT = '/home/lewis/quantum0/courses/main/static'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "main", "static"),  # Локальная папка

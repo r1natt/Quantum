@@ -68,6 +68,9 @@ def calc_loss(request):
 def calc_photo(request):
     return render(request, 'calc_photo.html')
 
+def calc_simulator(request):
+    return render(request, 'calc_simulator.html')
+
 def calcs_page(request):
     calcs_list = [
         [
@@ -81,7 +84,11 @@ def calcs_page(request):
                 # "short_desc": "Спросить у Кати текст",
                 "url": "/calc_photo"
             },
-            None,
+            {
+                "name": "Симулятор",
+                # "short_desc": "Спросить у Кати текст",
+                "url": "/calc_simulator"
+            },
         ]
     ]
     return render(

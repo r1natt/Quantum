@@ -1,0 +1,224 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>empty.page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <link rel="stylesheet" href="{% static 'empty.css' %}">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .calculator {
+      padding: 20px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .info-text {
+      padding: 0 20px 20px 20px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .info-text p {
+      margin-bottom: 10px;
+    }
+    .info-text ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .info-text li {
+      margin-bottom: 5px;
+    }
+    .text-main-content {
+      padding: 0px;
+      border-radius: 20px;
+      background-color: #fff;
+    }
+    .calculator-header {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      padding: 20px 0 10px 0;
+    }
+    .formula-display {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .input-group {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-group label {
+      min-width: 100px;
+      margin: 0;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 10px;
+      padding: 10px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #result span {
+      min-width: 100px;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body id="iw3mdg-2">
+
+  {% include "header.html" %}
+
+  <div id="iwcht1-2" class="gjs-grid-row">
+    <div id="ie4bdh-2" class="gjs-grid-column">
+      <div id="ieq3s9-2" class="gjs-grid-row">
+        <div id="i2rmok-2" class="gjs-grid-column">
+          <div class="text-main-content">
+            <div class="calculator-header">
+              Симулятор
+            </div>
+            <div class="info-text">
+              <p>Симулятор</p>
+            </div>
+            <div class="calculator">
+              <div class="input-group">
+                <label for="sim_time">Время симуляции (мс):</label>
+                <input type="range" id="sim_time" min="110" max="300" step="20" value="150">
+                <span id="sim_time_value">150</span>
+              </div>
+              <div class="input-group">
+                <label for="cc_delay">Задержка (мс):</label>
+                <input type="range" id="cc_delay" min="0.1" max="1" step="0.1" value="0.5">
+                <span id="cc_delay_value">0.5</span>
+              </div>
+              <div class="input-group">
+                <label for="qc_atten">Затухание (дБ/м):</label>
+                <input type="range" id="qc_atten" min="0.00001" max="0.00005" step="0.00001" value="0.00003">
+                <span id="qc_atten_value">3e-5</span>
+              </div>
+              <div class="input-group">
+                <label for="qc_dist">Расстояние (км):</label>
+                <input type="range" id="qc_dist" min="1" max="10" step="1" value="5">
+                <span id="qc_dist_value">5</span>
+              </div>
+              
+            </div>
+						<div id="result">
+							<img id="simulation_result" style="display: none; margin-top: 20px; max-width: 100%; height: auto;">
+						</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let timeoutId = null;
+    const delay = 2000; // 2 секунды задержки
+
+    function updateValue(inputId, valueId, value) {
+      document.getElementById(valueId).textContent = value;
+    }
+
+    function sendSimulationRequest() {
+      const sim_time = document.getElementById('sim_time').value;
+      const cc_delay = document.getElementById('cc_delay').value;
+      const qc_atten = document.getElementById('qc_atten').value;
+      const qc_dist = document.getElementById('qc_dist').value;
+
+      // Очищаем предыдущее изображение
+      const img = document.getElementById('simulation_result');
+      img.style.display = 'none';
+      img.src = '';
+
+      fetch('/simulator/simulate/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sim_time: parseFloat(sim_time),
+          cc_delay: parseFloat(cc_delay),
+          qc_atten: parseFloat(qc_atten),
+          qc_dist: parseFloat(qc_dist)
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          img.src = 'data:image/png;base64,' + data.image;
+          img.style.display = 'block';
+        } else {
+          console.error('Error:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    function handleSliderChange() {
+      // Отменяем предыдущий таймаут, если он есть
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Устанавливаем новый таймаут
+      timeoutId = setTimeout(sendSimulationRequest, delay);
+    }
+
+    // Добавляем обработчики событий для всех слайдеров
+    document.getElementById('sim_time').addEventListener('input', function(e) {
+      updateValue('sim_time', 'sim_time_value', e.target.value);
+      handleSliderChange();
+    });
+
+    document.getElementById('cc_delay').addEventListener('input', function(e) {
+      updateValue('cc_delay', 'cc_delay_value', e.target.value);
+      handleSliderChange();
+    });
+
+    document.getElementById('qc_atten').addEventListener('input', function(e) {
+      const value = parseFloat(e.target.value);
+      updateValue('qc_atten', 'qc_atten_value', value.toExponential(1));
+      handleSliderChange();
+    });
+
+    document.getElementById('qc_dist').addEventListener('input', function(e) {
+      updateValue('qc_dist', 'qc_dist_value', e.target.value);
+      handleSliderChange();
+    });
+
+    // Отправляем начальный запрос
+    sendSimulationRequest();
+  </script>
+</body>
+
+</html>
